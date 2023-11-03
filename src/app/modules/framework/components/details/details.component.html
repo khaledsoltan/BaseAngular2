@@ -1,0 +1,57 @@
+<section class="pb-5" appSpinner>
+  <!-- <Title-Template> -->
+  <div class="title_bx" *ngIf="title || subTitle">
+    <div class="row mx-0">
+      <div class="col-12">
+        <p *ngIf="title" class="P-title">{{title | translate}}</p>
+        <!-- <p class="P-title">Finance</p> -->
+        <p *ngIf="subTitle" class=" primary-text bold">{{subTitle | translate}}</p>
+      </div><!-- END C/col-12  -->
+    </div><!-- END C/row  -->
+
+  </div>
+  <breadcrumb [breadcrumbs]="breadcrumbs" *ngIf="breadcrumbs && breadcrumbs.length > 0"></breadcrumb>
+
+  <!-- END C/recListInfo_bx -->
+
+  <ng-container *ngIf="entity">
+    <!-- #region main card area -->
+
+    <ng-template [ngTemplateOutlet]="cardRegionTitles" [ngTemplateOutletContext]="{$implicit: entity}">
+    </ng-template>
+    <ng-template [ngTemplateOutlet]="spreadedCards" [ngTemplateOutletContext]="{$implicit: entity}">
+    </ng-template>
+
+    <div class="d-card verti-card pb-0 card-shadow d-main" *ngIf="mainCard">
+      <ng-template [ngTemplateOutlet]="mainCard" [ngTemplateOutletContext]="{$implicit: entity}"></ng-template>
+      <ng-template [ngTemplateOutlet]="tabsButtons" *ngIf="hasTabs === true && mainCard ">
+      </ng-template>
+    </div>
+
+    <!-- #endregion -->
+    <ng-template [ngTemplateOutlet]="tabsButtons" *ngIf="hasTabs === true && !mainCard  "></ng-template>
+    <!-- #region  tabs title  -->
+    <ng-template #tabsButtons>
+      <div class="tabs-btn d-tabs-btn"
+        [ngClass]="{'border-top ': mainCard && hasTabs ,'white-bg mb-3 rounded':!mainCard && hasTabs   }">
+        <p-button *ngFor="let tab of tabs ; index as i" (click)="activeIndex = i" [ngClass]="{active: activeIndex == i}"
+          styleClass="p-button-text " label="{{tab.title | translate }}"></p-button>
+      </div>
+    </ng-template>
+    <!-- #endregion -->
+
+    <!-- #region Tab content -->
+    <div class="list-parent">
+      <p-tabView class="list-tabs transparent-bg" [(activeIndex)]="activeIndex">
+        <p-tabPanel *ngFor="let item of tabs">
+          <ng-container *ngIf="item.tabTemplate">
+            <ng-template [ngTemplateOutlet]="item?.tabTemplate" [ngTemplateOutletContext]="{$implicit: entity}">
+            </ng-template>
+          </ng-container>
+        </p-tabPanel>
+
+
+      </p-tabView>
+    </div>
+  </ng-container>
+</section>

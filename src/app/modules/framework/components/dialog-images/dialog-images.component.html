@@ -1,0 +1,27 @@
+<img *ngIf="src" [src]="src" (error)="onImgError($event)" (click)="showDialog($event)"
+  class="rounded-circle  mx-1 img-fluid" [width]="width" [height]="height"
+  [ngStyle]="{'min-width.px': width , 'height.px': height}" alt=" ">
+<!-- <p-dialog *ngIf="src" [(visible)]="show" [modal]="true" [style]="{width: '70vw'}" [draggable]="false"
+    [resizable]="false" class="wthout-footer">
+    <div style="text-align: center;">
+        <img class="img-fluid" *ngIf="src" width="100%" height="200" style="max-height:100%" [src]="src"
+            (error)="onImgError($event)" (click)="showDialog($event)">
+    </div>
+</p-dialog> -->
+
+
+
+<!-- popup  -->
+
+<div *ngIf="show===true" id="myModal" class="profile-modal align-items-center justify-content-center flex-column"
+  (click)="hideDialog()">
+  <span class="close cursor-pointer" (click)="hideDialog()">&times;</span>
+  <div *ngIf="src" class="container d-flex justify-content-center align-items-center">
+    <img *ngIf="src" class="profile-modal-content rounded img-fluid" [src]="src" (error)="onImgError($event)"
+      style="max-height: 65vh;">
+  </div>
+
+</div>
+
+<!-- popup  -->
+<!-- #endregion -->

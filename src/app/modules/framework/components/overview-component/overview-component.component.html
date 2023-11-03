@@ -1,0 +1,181 @@
+<div class="row mx-0">
+    <div class="col-12 col-md-6 col-lg-{{overviewCols[0]||12}} ps-0 col-card">
+        <!-- identityCard -->
+        <div class="col-title">
+            <h6 class="bold">Customer Details</h6>
+        </div><!-- END C/col-title -->
+        <div class="d-card  hori-card card-shadow custDet_bx">
+            <div class="side-icon">
+                <img src="./assets/images/imgs/Avatar2.svg" alt="image">
+            </div>
+            <div class="data-side">
+                <div class="tit">
+                    <p>Proctol & Gambel - Germany</p>
+                    <span class="fs-14 primary-text">#10021451A</span>
+                </div>
+
+                <div class="info justify-content-start">
+                    <img src="./assets/images/imgs/Smile.svg" width="25" alt="image">
+                    <span class="key bold primary-text">
+                        Voucher code :</span>
+                    <span class="val primary-text">BAV22030008</span>
+                </div>
+                <div class="info justify-content-start">
+                    <img src="./assets/images/imgs/Star.svg" width="20" alt="image">
+                    <span class="key bold primary-text">
+                        Date :</span>
+                    <span class="val primary-text">12 Dec 2021</span>
+                </div>
+
+            </div>
+
+        </div><!-- END C/custDet_bx -->
+
+        <!-- #region timing card -->
+        <!-- Reminder -->
+        <div class="d-card card-shadow verti-card">
+            <h5 class="bold">Time remaning</h5>
+            <p class="m-0 muted-text fs-14">3 Months remaining</p>
+            <p-knob [min]="0" [max]="100" [strokeWidth]="8" [readonly]="true" [showValue]="true">
+            </p-knob>
+
+            <div class="info-alret gap-2">
+                <span class="info-text">Reminder </span>
+                <span class="muted-text fs-14">
+                    it s a long established fact that a reader will be distracted by the readable content of a
+                    page when
+                    looking at its layout.
+                </span>
+            </div>
+        </div>
+        <!-- #endregion timing card  -->
+    </div>
+
+    <!-- END C/col-12 -->
+    <div class="col-12 col-md-6 col-lg-{{overviewCols[1]||12}} col-card">
+        <div class="col-title">
+            <h6 class="bold">Payment</h6>
+        </div><!-- END C/col-title -->
+        <div class="d-card card-shadow payment_bx">
+            <div class="amount_bx flx_bx">
+                <h6>
+                    Total Amount <p>10,000.00</p>
+                </h6>
+                <span class="rounded-pill danger-badge bold">1400 Unsettled amount</span>
+            </div><!-- END C/amount_bx -->
+            <div class="settled_bx flx_bx">
+                <p-knob [min]="0" [max]="100" [strokeWidth]="8" [readonly]="true" [showValue]="false"></p-knob>
+                <div class="flx_bx">
+                    <h1>
+                        88% <p><span class="rounded-pill danger-badge bold">1400 Unsettled amount</span></p>
+                    </h1>
+                    <a href="#">Details <i class="pi pi-angle-down"></i></a>
+                </div><!-- END C/flx_bx -->
+            </div><!-- END C/settled_bx -->
+            <div class="dataLst_bx">
+                <table class="w-100">
+                    <thead>
+                        <tr>
+                            <th>
+                                <div>
+                                    PAYMENT
+                                </div>
+                            </th>
+                            <th>
+                                <div>
+                                    AMOUNT
+                                </div>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div>
+                                    <figure class="flx_bx">
+                                        <img src="./assets/images/imgs/Bag.svg" alt="image">
+                                        <p>Total amount</p>
+                                    </figure>
+                                </div>
+                            </td>
+                            <td>
+                                <div>
+                                    <span class="rounded-pill success-badge">27,810.00</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div>
+                                    <figure class="flx_bx">
+                                        <img src="./assets/images/imgs/Combined-Shape.svg" alt="image">
+                                        <p>Total amount</p>
+                                        <span class="success-text flt_rght">12%</span>
+                                    </figure>
+                                </div>
+                            </td>
+                            <td>
+                                <div>
+                                    <span class="rounded-pill success-badge">27,810.00</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div>
+                                    <figure class="flx_bx">
+                                        <img src="./assets/images/imgs/Wallet.svg" alt="image">
+                                        <p>Total amount</p>
+                                    </figure>
+                                </div>
+                            </td>
+                            <td>
+                                <div>
+                                    <span class="rounded-pill success-badge">27,810.00</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div>
+                                    <figure class="flx_bx">
+                                        <img src="./assets/images/imgs/icon-x.svg" alt="image">
+                                        <p>Total amount</p>
+                                    </figure>
+                                </div>
+                            </td>
+                            <td>
+                                <div>
+                                    <span class="rounded-pill success-badge">27,810.00</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <div>
+                                    <button type="button" class="btn-full gray-bg muted-text">View All
+                                        Transactions <i class="pi pi-angle-right"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div><!-- END C/dataLst_bx -->
+        </div><!-- END C/payment_bx -->
+
+        <div class="d-card card-shadow purple-bg p-3 patten-card">
+            <p class="text-white fs-14">download this reciept <b>as Excel,<br> Word or PDF</b></p>
+            <button class="success-tag text-white mt-3" type="button">create report</button>
+        </div>
+    </div><!-- END C/col-12 -->
+
+    <!-- #overviewDownloads -->
+    <div *ngIf="overviewCols.length > 2" class="col-12 col-md-6 col-lg-{{overviewCols[2]||12}} col-card no-tit">
+        <div class="d-card card-shadow purple-bg p-3">
+            <p class="text-white fs-14">download this reciept <b>as Excel,<br> Word or PDF</b></p>
+            <button class="success-tag text-white mt-3" type="button">create report</button>
+        </div>
+        <!-- END C/d-card  -->
+    </div>
+    <!-- </p-dataView> -->
+</div>

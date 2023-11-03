@@ -1,0 +1,10 @@
+<!-- #region Page List -->
+<app-data-list [columns]="colNames" [constFilters]="constFilters" [config]="dataListConfig"
+  [getItemsList]="getItemsList">
+  <ng-template #attachmentEntityFiles let-entity>
+    <app-entity-attachment-files [module]='module' [hasExpand]="true"
+      [attachmentDocumentId]="entity.attachmentDocTypeId" [entityEntryId]="attachmentFilters.sourceId">
+    </app-entity-attachment-files>
+  </ng-template>
+</app-data-list>
+<!-- #endregion -->

@@ -1,0 +1,767 @@
+<!-- <p class="P-title dark-text mb-1 ms-2" *ngIf="pageTitle && pageTitle.pageTit !== ' ' ">{{pageTitle.pageTit}}</p> -->
+<p class="P-title Primary-dark-text bold mb-0 mt-2 mx-2 fs-18" *ngIf="title">{{title |translate}}</p>
+<p class="primary-text bold mb-1 ms-2" *ngIf="subTitle">{{subTitle |translate}}</p>
+<breadcrumb *ngIf="breadcrumbs && breadcrumbs.length > 0 && hasBreadCrumb" [breadcrumbs]="breadcrumbs"></breadcrumb>
+<!-- <p class="bold primary-text mx-2" *ngIf="breadCrumbTitle"><span class="muted-text me-1">Home/</span>{{breadCrumbTitle}}
+</p> -->
+<div appSpinner class="h-100">
+  <ng-container *ngIf="tabsType === TabsTypes.Stages && tabs && tabs.length>0">
+    <p-tabView class="stages" [(activeIndex)]="activeTabIndex">
+      <p-tabPanel *ngFor="let tab of tabs; index as i">
+        <ng-template pTemplate="header">
+          <button class="btn" (click)="changeTab($event, tab,i)">
+            {{ tab?.title | translate}} <span *ngIf="tab.count !==null &&tab.count!==undefined"> ({{tab?.count}})</span>
+          </button>
+        </ng-template>
+      </p-tabPanel>
+    </p-tabView>
+  </ng-container>
+  <div class="d-card list-card mx-1 mb-0"
+    [ngClass]="{' ': viewType == ViewTypes.Cards , 'subPage': pageType === 'sub' , 'with-stages' : (tabs && tabs.length > 0 && tabsType === TabsTypes.Stages)}">
+
+    <!-- Table -->
+    <div class="datatable-header ps-0">
+      <!-- title or tabs side  -->
+      <div class="table-header d-md-flex justify-content-between py-2">
+        <!-- #region header title not tab -->
+        <div class="list-title ps-3"
+          *ngIf="(!tabs || tabs.length === 0) ||(tabs && tabs.length > 0 && tabsType === TabsTypes.Stages)">
+          <ng-template [ngTemplateOutlet]="headerTemplate"
+            [ngTemplateOutletContext]="{ $implicit: itemsList,pageMetadata:pageMetadata }">
+          </ng-template>
+          <ng-container *ngIf="!headerTemplate">
+            <div class="list-tit primary-text pe-2" *ngIf="cardTitle ">{{cardTitle |translate}}</div>
+            <div class="list-tit muted-text fs-13 mt-1" *ngIf="cardSubTitle">{{cardSubTitle |translate}}</div>
+          </ng-container>
+
+        </div>
+        <!-- #endregion -->
+
+        <!-- #region  tabs title  Dropdown-->
+        <ng-container *ngIf="tabsType === TabsTypes.Dropdown">
+          <div *ngIf="tabs && tabs.length>0" class="dropdown list-view">
+            <button style="border:none;" [ngClass]="{'dropdown-toggle': tabs && tabs.length>1}"
+              class="btn  d-flex align-items-center gap-1 px-0" type="button" data-bs-toggle="dropdown"
+              aria-expanded="false">
+              <img src="../../../../../assets/images/imgs/iq-act-tab.svg" width="30" alt="">
+
+              <h6 class="mb-0 bold"> {{tabs[activeTabIndex].title | translate}}</h6>
+              <span *ngIf="pageMetadata && !count"
+                class="px-2 py-1 ms-3 me-1 dropcount list-subt success-text">{{pageMetadata.totalItemCount || 0}}</span>
+              <span *ngIf="count" class="px-2 py-1 ms-3 me-1 dropcount list-subt success-text">{{count || 0}}</span>
+            </button>
+            <ul *ngIf="tabs && tabs.length>1" class="dropdown-menu dropdown-menu-right">
+
+              <li>
+                <p-button class="dropdown-item" *ngFor="let tab of tabs; index as i" (click)="changeTab($event, tab,i)"
+                  styleClass="p-button-text " [ngClass]="{active: activeTabIndex == i}"
+                  label="{{tab.title | translate}}">
+                </p-button>
+              </li>
+
+            </ul>
+          </div>
+        </ng-container>
+        <ng-container *ngIf="tabsType === TabsTypes.Tabs">
+          <div class="tabs-btn list-tab-btn" *ngIf="tabs && tabs.length > 0">
+            <p-button *ngFor="let tab of tabs; index as i" (click)="changeTab($event, tab,i)"
+              styleClass="p-button-text " [ngClass]="{active: activeTabIndex == i}"
+              label="{{tab.title | translate}}"></p-button>
+          </div>
+        </ng-container>
+        <!-- #endregion -->
+
+        <!-- #region actions side -->
+        <div class="actions px-2 d-flex gap-2 align-items-center">
+          <!-- <ul class="list-unstyled m-0"> -->
+          <!--   <li>
+              <button class="success-bg text-white action-btn">
+                <img src="../../../../../assets/images/imgs/export.svg" width="20" alt="" (click)="exportPopUp()">
+                {{'export.title'|translate}}</button>
+            </li>
+         <li class="action-icon">
+              <i class="las la-search"></i>
+            </li>
+            <li *ngIf="hasChangeViewAction" class="action-icon" (click)="changeView()">
+              <img src="../../../../../assets/images/imgs/tile-icon.svg" width="20" alt="">
+            </li>-->
+          <!-- <li *ngIf="hasSortOrderAction" class="action-icon dropdown" (click)="changeSorting()"> -->
+          <!-- </li> -->
+          <ul *ngIf="hasTitleActions===true" class="list-unstyled m-0">
+            <li>
+              <button (click)="exportPopUp()"
+                *ngIf="hasExport === true && exportFile&&(exportFile.excel || exportFile.word || exportFile.pdf)"
+                class="primary-light-bg text-white action-btn">
+                <img src="../../../../../assets/images/imgs/export.svg" width="20" alt="">
+                <span class="d-md-inline d-none"> {{'export.title'|translate}}</span></button>
+            </li>
+          </ul>
+          <div *ngIf="hasSortOrderAction" class="dropdown action-icon list-view">
+            <a class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <img src="../../../../../assets/images/imgs/sort.svg" width="25" alt="">
+
+            </a>
+            <div class="dropdown-menu">
+              <li (click)="changeSort(col)" *ngFor="let col of sortableCols">
+                <a class="dropdown-item" [ngClass]="{'active': searchModel && col.field===searchModel.orderBy}">
+                  <i *ngIf="searchModel &&searchModel.sortOrder===SortOrderEnum.Desc && col.field===searchModel.orderBy"
+                    class="p-sortable-column-icon pi pi-fw pi-sort-amount-down"></i>
+                  <i *ngIf="searchModel &&searchModel.sortOrder===SortOrderEnum.Asc && col.field===searchModel.orderBy"
+                    class="p-sortable-column-icon pi pi-fw pi-sort-amount-up-alt"></i>
+                  <i *ngIf="!searchModel || !searchModel.sortOrder ||  col.field!==searchModel.orderBy"
+                    class="p-sortable-column-icon pi pi-fw pi-sort-alt"></i>
+                  {{col.title | translate}}</a>
+              </li>
+            </div>
+          </div>
+
+
+          <!-- </ul> -->
+          <actions *ngIf="hasTitleActions===true" [actions]="titleActions" [hideAction]="hideAction"
+            [moreActionType]="ActionTypeEnum.dotsMoreActions" [params]="selectedItems"
+            [additionalParams]="additionalParams"></actions>
+        </div>
+        <!-- #endregion -->
+
+        <span class="p-input-icon-left" [hidden]="true">
+          <i class="pi pi-search"></i>
+          <input pInputText type="text" placeholder="Global Search" />
+        </span>
+      </div>
+    </div>
+
+    <!-- Export options pop-up -->
+
+    <!-- Export options pop-up -->
+
+    <!-- #region Tab content -->
+    <div class="list-parent" *ngIf="tabs && tabs.length > 0">
+      <p-tabView class="list-tabs">
+        <p-tabPanel>
+          <ng-template [ngTemplateOutlet]="tabContent"></ng-template>
+        </p-tabPanel>
+      </p-tabView>
+    </div>
+    <!-- #endregion -->
+    <!-- not tab content list with tille 1 view   -->
+
+    <!-- #region list without tabs  -->
+    <div class="list-parent" *ngIf="!tabs || tabs.length === 0">
+      <ng-template [ngTemplateOutlet]="tabContent"></ng-template>
+    </div>
+    <!-- #endregion -->
+
+    <!-- list and card view  -->
+    <ng-template #tabContent>
+      <p-table #dt [hidden]="viewType != ViewTypes.Grid" [scrollable]="true" [lazy]="!disableLazy"
+        [paginator]="!disablePaginator" [dataKey]="dataKey" [value]="itemsList" [columns]="columns"
+        [rows]="defaultGridSettings.PageSize" [sortOrder]="-1" [sortField]="searchModel?.orderBy || defSortBy || 'id'"
+        [rowHover]="true" [autoLayout]="true" [responsive]="true" [alwaysShowPaginator]="alwaysShowPaginator"
+        [totalRecords]="pageMetadata?.totalItemCount || itemsList?.length || 0"
+        [first]="(pageMetadata?.firstItemOnPage)||0" [showCurrentPageReport]="true"
+        [rowsPerPageOptions]="defaultGridSettings.RowsPerPageOptions" [loading]="displayLoader===true"
+        responsiveLayout="scroll" (onLazyLoad)="onLazyLoad($event)" [scrollHeight]="scrollHeight || '' "
+        currentPageReportTemplate=" {{pageMetadata?.firstItemOnPage ||0}} - {{pageMetadata?.lastItemOnPage}} {{hideTotalRecords?'': ('helpers.common.of' |translate) + (pageMetadata?.totalItemCount) + ('helpers.common.totalRecords' |translate) }}">
+        <!-- <ng-template pTemplate="caption">
+  
+        </ng-template> -->
+
+        <ng-template *ngIf="!hiddenGridHeader" pTemplate="header" let-columns>
+          <tr>
+            <th *ngFor="let col of columns" [pTooltip]="col.title |translate" tooltipPosition="top"
+              [pSortableColumn]="col.sortable === true?(col.sortField || col.field):null" [hidden]="isColHidden(col)"
+              [ngStyle]="{ 'min-width':  getPercent(col) ,'max-width': getPercent(col) }">
+              <!-- <div class="d-flex ">
+  
+                <p-sortIcon *ngIf="col.sortable===true" [field]="col.sortField || col.field" style="height: 20px;">
+                </p-sortIcon>
+                <span style="padding-top: 7px">{{ col.title | translate}}</span>
+              </div> -->
+
+
+
+
+              <div class="d-flex align-items-center mw-100 w-100">
+                <div class="positioned-icons">
+                  <p-sortIcon *ngIf="col.sortable===true" [field]="col.sortField || col.field">
+                  </p-sortIcon>
+                </div>
+                <p-columnFilter class="mx-1" [showAddButton]="false"
+                  [showMatchModes]="col.searchField.showOperators !== false" [showOperator]="false"
+                  [matchModeOptions]="getColOperators(col)"
+                  *ngIf="col.searchable === true && col.searchField && !isConstFilter(col)" [hideOnClear]="true"
+                  [type]="col.searchField.type" [field]="col.searchField.field || col.field" display="menu"
+                  [matchMode]="getDefColOperator(col)">
+                  <ng-template pTemplate="filter" let-value
+                    *ngIf="col.searchField.type == ColumnFilterTypes.AutoComplete">
+                    <p-autoComplete [ngModel]="value" class="form-control autocomplete-form-control w-100"
+                      appendTo="body" field="{{col.searchField.selectFieldProps.value}}"
+                      [delay]="col.searchField.selectFieldProps.apiSingleCalling===true?0:1500"
+                      [suggestions]="col.searchField.selectFieldProps.selectList"
+                      (completeMethod)="completeMethod($event,col.searchField)" [size]="30" [minLength]="1"
+                      [dropdown]="true">
+                      <ng-template let-item pTemplate="item">
+                        <div class="ui-helper-clearfix" style="border-bottom:1px solid #D5D5D5">
+                          <div>
+                            {{item[col.searchField.selectFieldProps.value]}}
+                          </div>
+                        </div>
+                      </ng-template>
+                    </p-autoComplete>
+
+                  </ng-template>
+                </p-columnFilter>
+                <div class=""
+                  [ngClass]="{'header-title-with-actions' :col.sortable  ,'header-title-without-actions': !col.sortable}">
+                  {{ col.title | translate}}
+                </div>
+
+
+              </div>
+
+            </th>
+          </tr>
+        </ng-template>
+
+
+        <ng-template pTemplate="body" let-dataItem let-columns="columns" let-rowIndex="rowIndex"
+          let-expanded="expanded">
+          <tr [pSelectableRow]="dataItem" [pContextMenuRow]="dataItem">
+
+            <td [ngStyle]="{ 'min-width': getPercent(col),'max-width': getPercent(col) }"
+              *ngFor="let col of columns; let colIndex = index" [hidden]="isColHidden(col)">
+
+              <!-- row expand -->
+              <a (click)="onExpandRow(dataItem, dt)" *ngIf="colIndex === 0 && config.hasRowExpansion === true"
+                style="cursor: pointer" [pRowToggler]="dataItem">
+                <i [ngClass]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"></i>
+              </a>
+              <!-- row expand -->
+              <!-- <ng-template *ngIf="col.field === 'isActive'" [ngTemplateOutlet]="isActiveTemplate"
+                [ngTemplateOutletContext]="{ $implicit: dataItem }"></ng-template> -->
+              <!--begin::Handle actions & Data Fields-->
+
+              <!-- //////////////////// -->
+
+              <ng-container *ngIf="col.cellTemplateType; then cellTemplateType ;else nonTemplateType">
+              </ng-container>
+
+              <ng-template #cellTemplateType>
+                <ng-container *ngIf="col.cellTemplateType === CellTemplateTypes.IsActivate">
+                  <span *ngIf="col.field === 'isActive' && dataItem['isActive']===true"
+                    class="success-badge rounded-pill px-2">{{'helpers.common.active'| translate}}</span>
+                  <span *ngIf=" col.field === 'isActive' && dataItem['isActive']===false"
+                    class="danger-badge rounded-pill px-2">{{'helpers.common.inActive'| translate}}</span>
+                </ng-container>
+              </ng-template>
+
+              <ng-template #nonTemplateType>
+                <ng-container *ngIf="col.subfield; then nested_object_content;else render_data_field">
+                </ng-container>
+                <ng-template #render_data_field>
+                  <ng-container *ngIf="col.field === 'actions'; then render_actions;else dataOrTemplate">
+                  </ng-container>
+                </ng-template>
+                <ng-template #dataOrTemplate>
+                  <ng-container *ngIf="!col.cellTemplate ;then dataOnly  else cellTemplate">
+                  </ng-container>
+                </ng-template>
+                <ng-template #cellTemplate [ngTemplateOutlet]="col?.cellTemplate"
+                  [ngTemplateOutletContext]="{$implicit:dataItem,viewType:viewType}" *ngIf="col?.cellTemplate;">
+                </ng-template>
+                <ng-template #dataOnly>
+                  <ng-container *ngIf="col.showTooltip === true && !isEmpty(dataItem[col.field])">
+                    <span *ngIf="!col.pipe" class="text-truncate mw-100 d-inline-block">
+                      {{getFieldValue(dataItem[col.field]) | translate}}
+                    </span>
+                    <span *ngIf="col.pipe === Pipes.date" tooltipPosition="top"
+                      class="text-truncate mw-100 d-inline-block" style="direction: ltr;">
+                      {{ getFieldValue(dataItem[col.field]) | date: (col.pipeFormat || 'dd/MM/yyyy') }}
+                    </span>
+                    <span *ngIf="col.pipe === Pipes.money" class="text-truncate mw-100 d-inline-block ms-auto">
+                      {{ getFieldValue(dataItem[col.field]) | number:'1.2-2' : 'en-us'}}
+                      <span class="fw-bolder Primary-light-1-text
+                        " *ngIf="showColCurrency && colCurrency">{{ colCurrency
+                        | translate}}</span>
+                    </span>
+                    <span *ngIf="col.pipe === Pipes.decimal" class="text-truncate mw-100 d-inline-block ms-auto">
+                      {{ getFieldValue(dataItem[col.field]) | number:'1.0-0' : 'en-us'}}
+                    </span>
+                  </ng-container>
+                  <ng-container *ngIf="col.showTooltip !== true || isEmpty(dataItem[col.field])">
+                    <span *ngIf="!col.pipe || isEmpty(dataItem[col.field])" class="text-truncate mw-100 d-inline-block">
+                      {{getFieldValue(dataItem[col.field]) }}
+                    </span>
+                    <ng-container *ngIf="!isEmpty(dataItem[col.field]) && col.pipe">
+                      <span *ngIf="col.pipe === Pipes.date" class="text-truncate mw-100 d-inline-block"
+                        style="direction: ltr;">
+                        {{ dataItem[col.field] | date: (col.pipeFormat || "dd/MM/yyyy")}}
+                      </span>
+                      <span *ngIf="col.pipe === Pipes.money" class="text-truncate mw-100 d-inline-block ms-auto">
+                        {{dataItem[col.field] | number:'1.2-2' : 'en-us'}}
+                        <span class="fw-bolder Primary-light-1-text" *ngIf="showColCurrency && colCurrency">{{
+                          colCurrency |
+                          translate}}</span>
+                      </span>
+                      <span *ngIf="col.pipe === Pipes.decimal" class="text-truncate mw-100 d-inline-block ms-auto">
+                        {{dataItem[col.field] | number:'1.0-0' : 'en-us'}}
+                      </span>
+                    </ng-container>
+
+                  </ng-container>
+                </ng-template>
+
+                <ng-template #nested_object_content>
+                  {{ !col.pipe ? dataItem[col.field][col.subfield] : col.pipe === "date" ?
+                  (dataItem[col.field][col.subfield] | date: (col.pipeFormat||"dd/MM/yyyy")) :
+                  dataItem[col.field][col.subfield]}}
+                </ng-template>
+              </ng-template>
+
+              <!-- /////////////////////////////////////  -->
+              <ng-template #render_actions>
+                <!-- <span class="d-flex">
+              <span class="d-inline-block">
+                <div class="dropdown">
+                  <a href="#" class="btn m-btn m-btn--hover-brand m-btn--icon m-btn--icon-only m-btn--pill"
+                    data-toggle="dropdown" aria-expanded="true">
+                    <i class="la la-ellipsis-v"></i>
+                  </a>
+                  <div class="dropdown-menu dropdown-menu-right">
+                    <a class="dropdown-item" data-toggle="modal" data-target="#editModal">
+                      <i class="la la-money"></i>
+                      تعديل
+                    </a>
+  
+  
+                    <a class="dropdown-item" data-toggle="modal" data-target="">
+                      <i class="la la-file"></i>
+                      تفاصيل
+                    </a>
+  
+                  </div>
+                </div>
+              </span>
+  
+            </span>  -->
+                <button *ngIf="hasDetailsBtn" (click)="onDetailsBtnClick(dataItem)"
+                  class="py-1 px-4 fs-14  {{viewBtnClass}}">{{viewBtnTitle|translate}}</button>
+                <actions
+                  *ngIf="hideRowActions !== true && (!rowActions.hidden || (rowActions.hidden && rowActions.hidden(dataItem, rowIndex) !== true))
+                          && (!hiddenRowActions || (hiddenRowActions && hiddenRowActions(dataItem, rowIndex) !== true ))"
+                  [actions]="rowActions" class="tbl-row-actions" [rowIndex]="rowIndex"
+                  (onToggleCol)="onToggleCol($event)" [params]="dataItem" [hideAction]="hideAction"
+                  [additionalParams]="additionalParams">
+                </actions>
+              </ng-template>
+
+            </td>
+          </tr>
+        </ng-template>
+
+
+
+        <ng-template pTemplate="emptymessage" let-columns>
+          <tr class="empty-tr text-center h-100">
+            <td [attr.colspan]="columns?.length" class="empty-grid-table">
+              {{ 'helpers.buttons.noDataAvailable'| translate}}
+            </td>
+          </tr>
+        </ng-template>
+
+        <!-- row expand template -->
+        <ng-template pTemplate="rowexpansion" let-dataListItem let-columns="columns" let-frozen="frozen">
+          <tr *ngIf="config.hasRowExpansion === true" class="row-expansion-tr" #rowExpand>
+            <td [attr.colspan]="columns.length" class="td-expansion">
+              <ng-container>
+                <ng-container *ngIf="!config.expansionTemplate; then rowData; else template">
+                </ng-container>
+
+                <ng-template #rowData>
+                  <div class="ui-g ui-fluid">
+                    <div class="ui-g-12 ui-md-12">
+                      <div class="ui-g">
+                        <div class="ui-g-12" *ngFor="let col of columns">
+                          <ng-container *ngIf="col.field !== 'actions' && isColHidden(col) !== true">
+                            <b>
+                              {{col.title | translate}}:
+                            </b>
+                            {{ !col.pipe ? dataListItem[col.field] : col.pipe === "date" ?
+                            (dataListItem[col.field]
+                            | date: (col.pipeFormat||"dd/MM/yyyy")) : dataListItem[col.field]}}
+                          </ng-container>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </ng-template>
+
+                <ng-template #template [ngTemplateOutlet]="config.expansionTemplate"
+                  [ngTemplateOutletContext]="{$implicit:dataListItem}"></ng-template>
+
+              </ng-container>
+            </td>
+          </tr>
+        </ng-template>
+
+      </p-table>
+
+      <!-- tile view  -->
+      <div class="pt-3 rounded h-100" *ngIf="viewType == ViewTypes.Cards">
+        <div class="row mx-0 tile-cards">
+          <ng-container *ngFor="let dataItem of itemsList; let i=index;">
+            <div *ngIf="!cardTemplate" class="col-lg-3 col-md-6 px-1">
+              <div class="{{badgeCardClass(dataItem)}} d-card tile-card verti-card card-shadow ">
+                <div class="d-header mb-3">
+
+                  <img src="../../../../assets/images/imgs/file-act.svg" width="45" alt="">
+                  <!-- <span *ngIf="dataItem['isActive']===true" class="success-badge">{{'helpers.common.active'|
+                    translate}}</span>
+                  <span *ngIf="dataItem['isActive']===false" class="danger-badge">{{'helpers.common.inActive'|
+                    translate}}</span> -->
+
+                  <!-- <span *ngIf="badgeTitle != null" class="danger-badge">{{badgeTitle(dataItem) | translate}}</span> -->
+                  <span class="{{getBadgeConfig(dataItem).class}} stat-badge fs-13 text-truncate"
+                    *ngIf="badgeTitle(dataItem)">
+                    {{getBadgeConfig(dataItem).title| translate}}</span>
+
+                </div>
+                <div class="data-side">
+                  <span *ngIf="cardHeaderKey" class="tit">
+                    <span>
+                      <h6 class="tit black-text bold" *ngIf="cardHeader">{{cardHeader | translate}}
+                        {{dataItem[cardHeaderKey]}}
+                      </h6>
+                      <h6 *ngIf="cardSubHeaderKey" class="sub-tit primary-text bold">{{cardSubHeader | translate}}
+                        {{dataItem[cardSubHeaderKey]}}</h6>
+                    </span>
+                    <!-- <img *ngIf="hasPrintSetupBtn" src="../../../../assets/images/imgs/export-card.svg" width="30" alt=""
+                      (click)="onPrintSetupBtnClick()"> -->
+                  </span>
+                  <div class="mb-2" *ngFor="let col of columns">
+
+                    <span
+                      *ngIf=" !col.cardFieldHidden && col.field != 'isActive' && col.field != 'code'&&  col.field != 'actions' &&!isColHidden(col)&& col.field != dataItem[cardHeaderKey]"
+                      class="info black-text ">
+
+                      <ng-container *ngIf="col.cellTemplateType; then cellTemplateType ;else nonTemplateType">
+                      </ng-container>
+
+                      <ng-template #cellTemplateType>
+                        <ng-container *ngIf="col.cellTemplateType === CellTemplateTypes.IsActivate">
+                          <span *ngIf="col.field === 'isActive' && dataItem['isActive']===true"
+                            class="success-badge rounded-pill px-2">{{'helpers.common.active'| translate}}</span>
+                          <span *ngIf=" col.field === 'isActive' && dataItem['isActive']===false"
+                            class="danger-badge rounded-pill px-2">{{'helpers.common.inActive'| translate}}</span>
+                        </ng-container>
+                      </ng-template>
+
+                      <ng-template #nonTemplateType>
+
+                        <ng-container *ngIf="col.subfield; then nested_object_content;else render_data_field">
+                        </ng-container>
+                        <ng-template #render_data_field>
+                          <ng-container *ngIf="col.field === 'actions'; then render_actions;else dataOrTemplate">
+                          </ng-container>
+                        </ng-template>
+                        <ng-template #dataOrTemplate>
+                          <ng-container *ngIf="!col.cellTemplate;then dataOnly; else cellTemplate"></ng-container>
+                        </ng-template>
+                        <ng-template #cellTemplate [ngTemplateOutlet]="col.cellTemplate"
+                          [ngTemplateOutletContext]="{$implicit:dataItem , viewType:viewType}">
+                        </ng-template>
+                        <ng-template #render_actions>
+                          <button *ngIf="hasDetailsBtn" (click)="onDetailsBtnClick(dataItem)"
+                            class="py-1 px-4 fs-13 {{viewBtnClass}}">{{viewBtnTitle|translate}}</button>
+
+                          <actions *ngIf="hideRowActions !== true && (!rowActions.hidden || (rowActions.hidden && rowActions.hidden(dataItem, i) !== true))
+                            && (!hiddenRowActions || (hiddenRowActions && hiddenRowActions(dataItem, i) !== true ))"
+                            [actions]="rowActions" class="tbl-row-actions" [rowIndex]="i"
+                            (onToggleCol)="onToggleCol($event)" [params]="dataItem" [hideAction]="hideAction"
+                            [additionalParams]="additionalParams">
+                          </actions>
+
+
+                        </ng-template>
+                        <ng-template #dataOnly>
+                          <span
+                            *ngIf="col.field != 'isActive' && col.field != 'code' && col.field != 'actions' &&!isColHidden(col) && col.field != dataItem[cardHeaderKey]"
+                            class="key dark-text bold fs-13">{{col.title | translate}}
+                            :</span>
+                          <ng-container *ngIf="!isEmpty(dataItem[col.field])">
+                            <span *ngIf="!col.pipe" class="val bold text-truncate fs-13 black-text">
+                              {{getFieldValue(dataItem[col.field]) | translate}}
+                            </span>
+                            <span *ngIf="col.pipe === Pipes.date" tooltipPosition="top"
+                              class="val bold text-truncate fs-13 black-text" style="direction: ltr;">
+                              {{ getFieldValue(dataItem[col.field]) | date: (col.pipeFormat || 'dd/MM/yyyy') }}
+                            </span>
+                            <span *ngIf="col.pipe === Pipes.money" tooltipPosition="top" class="val bold text-truncate fs-13 black-t
+                                ext ms-auto">
+                              {{ getFieldValue(dataItem[col.field]) | number:'1.2-2' : 'en-us'}}
+                              <span class="fw-bolder Primary-light-1-text" *ngIf="showColCurrency && colCurrency">{{
+                                colCurrency |
+                                translate}}</span>
+                            </span>
+                            <span *ngIf="col.pipe === Pipes.decimal" tooltipPosition="top"
+                              class="val bold text-truncate fs-13 black-text ms-auto">
+                              {{ getFieldValue(dataItem[col.field]) | number:'1.0-0' : 'en-us'}}
+                            </span>
+                          </ng-container>
+                          <ng-container *ngIf=" isEmpty(dataItem[col.field])">
+                            <span *ngIf="!col.pipe || isEmpty(dataItem[col.field])"
+                              class="val bold text-truncate fs-13 black-text">
+                              {{getFieldValue(dataItem[col.field]) | translate}}
+                            </span>
+                            <ng-container *ngIf="!isEmpty(dataItem[col.field]) && col.pipe">
+                              <span *ngIf="col.pipe === Pipes.date" class="val bold text-truncate fs-13 black-text"
+                                style="direction: ltr;">
+                                {{ dataItem[col.field] | date: (col.pipeFormat || "dd/MM/yyyy")}}
+                              </span>
+                              <span *ngIf="col.pipe === Pipes.money"
+                                class="val bold text-truncate fs-13 black-text ms-auto">
+                                {{dataItem[col.field] | number:'1.2-2' : 'en-us'}}
+                                <span class="fw-bolder Primary-light-1-text" *ngIf="showColCurrency && colCurrency">{{
+                                  colCurrency |
+                                  translate}}</span>
+                              </span>
+                              <span *ngIf="col.pipe === Pipes.decimal"
+                                class="val bold text-truncate fs-13 black-text ms-auto">
+                                {{dataItem[col.field] | number:'1.0-0' : 'en-us'}}
+                              </span>
+                            </ng-container>
+                          </ng-container>
+
+                        </ng-template>
+
+                        <ng-template #nested_object_content>
+                          {{ !col.pipe ? dataItem[col.field] : col.pipe === "date" ?
+                          (dataItem[col.field] | date: (col.pipeFormat||"dd/MM/yyyy")) :
+                          dataItem[col.field]}}
+                        </ng-template>
+                      </ng-template>
+                      <!-- {{dataItem[col.field] | translate}} -->
+                    </span>
+                  </div>
+                </div>
+                <button *ngIf="(dataItem['isActive']== null || dataItem['isActive']===true) && hasDetailsBtn"
+                  class="btn-full {{badgeBtnClass(dataItem)}} py-2 gray-bg border-0"
+                  (click)="onDetailsBtnClick(dataItem)">{{viewBtnTitle|translate}}</button>
+
+                <button *ngIf="dataItem['isActive']===false && hasDetailsBtn"
+                  class="btn-full {{badgeBtnClass(dataItem)}} gray-bg py-2 border-0"
+                  (click)="onDetailsBtnClick(dataItem)">{{viewBtnTitle|translate}}</button>
+
+                <actions *ngIf="hideRowActions !== true && (!rowActions.hidden || (rowActions.hidden && rowActions.hidden(dataItem, i) !== true))
+                  && (!hiddenRowActions || (hiddenRowActions && hiddenRowActions(dataItem, i) !== true ))"
+                  [actions]="rowActions" class="tbl-row-actions" [rowIndex]="i" (onToggleCol)="onToggleCol($event)"
+                  [params]="dataItem" [hideAction]="hideAction" [additionalParams]="additionalParams">
+                </actions>
+                <!-- <div class="d-footer">
+                  <div>
+                    <p class="dark-text bold">Mar , 14 2020</p>
+  
+                  </div>
+                </div> -->
+
+              </div>
+
+            </div>
+            <ng-template [ngTemplateOutlet]="cardTemplate" [ngTemplateOutletContext]="{ $implicit: dataItem }">
+            </ng-template>
+          </ng-container>
+
+
+          <div *ngIf="itemsList && itemsList?.length===0" class="col-lg-12 col-md-12 ps-0">
+            <div class="empty-tr text-center h-100">
+              <span class="empty-grid-table">
+                {{ 'helpers.buttons.noDataAvailable'| translate}}
+              </span>
+            </div>
+
+          </div>
+
+
+        </div>
+
+        <p-paginator *ngIf="!disablePaginator && itemsList && itemsList.length > 0"
+          [rows]="pageMetadata?.pageSize || defaultGridSettings.PageSize" [alwaysShow]="alwaysShowPaginator"
+          [rowsPerPageOptions]="defaultGridSettings.RowsPerPageOptions" [first]="(pageMetadata?.firstItemOnPage)||0"
+          [totalRecords]="pageMetadata?.totalItemCount || 0" (onPageChange)="onLazyLoad($event)"
+          [templateLeft]="templateLeft">
+          <!-- [templateRight]="templateRight"
+          <ng-template #templateRight let-state>
+            <span class="fs-14">{{'helpers.common.totalRecords' | translate}}:
+              <span class="fs-14 font-weight-bold">{{state.totalRecords||0}}</span>
+            </span>
+          </ng-template> -->
+
+          <ng-template #templateLeft let-state>
+            <div>
+              <span class="text-capitalize">
+                <!-- {{'helpers.common.page' | translate}} -->
+
+                <!-- <input class="page-number text-left px-2 py-0 no-outline" min="1" max="{{pageMetadata?.pageCount}}"
+                  (keyup.enter)="onLazyLoad(pageNumber)" type="number" formControlName="pageNumber"> -->
+                <span class="fs-14 font-weight-bold">{{state.page
+                  +1 ||0}}</span>
+              </span>
+              <span *ngIf="pageMetadata && pageMetadata.pageCount">
+                <!-- {{'helpers.common.of' |translate}} -->
+                - {{pageMetadata?.pageCount}}
+              </span>
+              <span *ngIf="!hideTotalRecords" class="fs-14">{{'helpers.common.of' |translate}}
+                <span class="fs-14 font-weight-bold">{{state.totalRecords||0}} {{'helpers.common.totalRecords' |
+                  translate}}</span>
+              </span>
+            </div>
+          </ng-template>
+        </p-paginator>
+      </div>
+    </ng-template>
+
+    <!-- #region Search Card -->
+    <advanced-search *ngIf="advancedSearchConfig && hasAdvancedSearch" [config]="advancedSearchConfig"
+      (onSearch)="onAdvancedSearch($event)" (onReset)="onAdvancedResetSearch()"></advanced-search>
+    <!-- #endregion -->
+  </div>
+</div>
+
+<p-dialog *ngIf="hasExport===true && exportFile && (exportFile.excel || exportFile.word || exportFile.pdf)"
+  header="{{'export.exportOptions' | translate}}" [modal]="true" [style]="{width: '50vw'}" [draggable]="false"
+  [resizable]="false" [(visible)]="showExportModal" [modal]="true" (onHide)="closeExportModal()">
+  <form [formGroup]="exportFileForm" (ngSubmit)="exportFiles($event)" class="form-horizontal">
+    <div class="modal-body p-3">
+      <div class="row mx-0">
+
+        <div class="col-md-6">
+          <div class="form-group mb-1">
+            <div class="form-label">
+              <label for="fileName">
+                {{'export.fileName' | translate}}
+                <span class="required danger"> *</span>
+              </label>
+            </div>
+            <div class="form-input">
+
+              <input formControlName="fileName" type="text" class="form-control" id="englishName"
+                [ngClass]="{'is-invalid': (exportFormSubmitted || exportFileForm.get('fileName')?.touched) && exportFileForm.get('fileName')?.errors}">
+              <div class="invalid-feedback"
+                *ngIf="exportFileForm.get('fileName')?.errors?.['required'] && (exportFormSubmitted || exportFileForm.get('fileName')?.touched)">
+                {{'helpers.validation.required' | translate}}
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="col-md-6 col-12">
+          <div class="form-group mb-2">
+            <div class="form-label">
+              <label for="exportType">
+                {{'export.exportType' | translate}}
+                <span class="required danger"> *</span>
+              </label>
+            </div>
+            <div class="form-input">
+              <select class="form-control" formControlName="exportType">
+                <option [value]="ExportTypes.pdf" *ngIf="exportFile.pdf === true">{{ExportTypes.pdf}}
+                </option>
+                <option [value]="ExportTypes.word" *ngIf="exportFile.word === true">
+                  {{ExportTypes.word}}
+                </option>
+                <option [value]="ExportTypes.excel" *ngIf="exportFile.excel === true">
+                  {{ExportTypes.excel}}
+                </option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+
+
+        <div class="col-md-6 col-12">
+          <div class="form-group mb-2">
+            <div class="form-label">
+              <label for="exportSelection">
+                {{'export.exportSelection' | translate}}
+                <span class="required danger"> *</span>
+              </label>
+            </div>
+
+            <div class="form-input">
+              <div *ngIf="selectedItems && selectedItems.length > 0" class="px-1">
+                <p-radioButton name="exportSelection" [value]="ExportFileSelection.SelectedRows"
+                  label="{{'export.selectedRows'|translate}}" formControlName="exportSelection">
+                </p-radioButton>
+              </div>
+              <div class="px-1">
+                <p-radioButton name="exportSelection" [value]="ExportFileSelection.CurrentPage"
+                  label=" {{'export.currentPage'|translate}}" formControlName="exportSelection">
+                </p-radioButton>
+              </div>
+              <div class="px-1">
+                <p-radioButton *ngIf="getItemsList" name="exportSelection" [value]="ExportFileSelection.AllPages"
+                  label=" {{'export.allPages'|translate}}" formControlName="exportSelection">
+                </p-radioButton>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+      </div>
+    </div>
+  </form>
+  <ng-template pTemplate="footer">
+    <button (click)="exportFiles($event)" type="submit" class="btn primary-bg white-text">
+      {{'export.title' | translate}}
+    </button>
+    <button type="button" data-dismiss="modal" class="btn white-bg primary-text primary-border"
+      (click)="closeExportModal()">
+      {{'helpers.buttons.cancelButton' | translate}}
+    </button>
+  </ng-template>
+</p-dialog>
+
+<!-- #region Attachmnets -->
+
+<p-dialog *ngIf="entityInfo?.hasAttachments" header="{{'helpers.common.attachment' | translate}}" [modal]="true"
+  [style]="{width: '70vw'}" [draggable]="false" [resizable]="false" [(visible)]="showAttachmentModal" [modal]="true"
+  (onHide)="closeAttachmentModal()">
+  <div class="modal-body p-3" *ngIf="attachmentFilter">
+    <app-entity-attachments [module]='config.module' [filterAttachment]="attachmentFilter" [hasAdvancedSearch]="false">
+    </app-entity-attachments>
+  </div>
+</p-dialog>
+
+<p-dialog header="{{'helpers.common.sendMessage'|translate}}" [resizable]="true" appendTo="body"
+  [(visible)]="showSendMsg" [draggable]="false" [modal]="true" [closable]="true" (onHide)="onSendMsgDialogHide()"
+  [style]="{width: '55vw'}">
+  <app-send-message *ngIf="hasSendMessageAction && entityNameId && showSendMsg" [entityId]="entityId"
+    [entityNameId]="entityNameId" [entityCode]="entityCode" [sentToUserId]="sentToUserId"
+    (onSaved)="closeSendMessageDialog()" (onCanceled)="closeSendMessageDialog()">
+  </app-send-message>
+</p-dialog>
+
+<p-dialog header="{{'helpers.common.messages'|translate}}" [(visible)]="showViewMsg" [draggable]="false" [modal]="true"
+  [closable]="true" (onHide)="onViewMsgDialogHide()" [style]="{width: '55vw'}" [baseZIndex]="1050" [autoZIndex]="false"
+  class="chat-modal">
+  <app-message-list *ngIf="hasViewMessageAction && entityNameId && showViewMsg" [entityId]="entityId"
+    [entityNameId]="entityNameId" [entityCode]="entityCode" [sentToUserId]="sentToUserId"
+    (onSaved)="closeViewMessageDialog()" (onCanceled)="closeViewMessageDialog()">
+  </app-message-list>
+</p-dialog>
+
+<p-dialog class="wthout-footer" header="{{'attachment.title' | translate}}" [(visible)]="showAttachements"
+  [style]="{width: '80vw'}" [dismissableMask]="true" [draggable]="false" (onHide)="onAttachmentsDialogHide()"
+  [baseZIndex]="1050" [autoZIndex]="false">
+  <app-uploader *ngIf="hasAttachments && entityNameId && showAttachements" #uploader [isMultiple]="true"
+    [entityId]="entityId" [entityNameId]="entityNameId" [entityCode]="entityCode" [sentToUserId]="sentToUserId"
+    [attachmentsViewOnly]="attachmentsViewOnly" (onSaved)="onCancelAttachementDialoge()"
+    (onCanceled)="onCancelAttachementDialoge()"></app-uploader>
+</p-dialog>
+
+<!-- #endregion -->

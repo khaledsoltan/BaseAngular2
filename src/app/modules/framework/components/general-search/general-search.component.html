@@ -1,0 +1,38 @@
+<p-dialog [(visible)]="showModal" position="center" appendTo=".general-search-parent" [modal]="true" [draggable]="false"
+  (onHide)="closeModal()">
+
+  <p-header>
+    <span>{{ 'generalSearch.title' | translate}}</span>
+  </p-header>
+
+
+  <!-- content -->
+
+  <!-- #region if has page list template -->
+  <ng-container *ngIf="pageListTemplate">
+    <ng-template [ngTemplateOutlet]="pageListTemplate"></ng-template>
+  </ng-container>
+  <!-- #endregion -->
+
+
+  <!-- #region if has data-list-config and columns  -->
+  <ng-container *ngIf="!pageListTemplate && columns">
+    <app-data-list #dataList>
+    </app-data-list>
+  </ng-container>
+  <!-- #endregion  -->
+
+  <!-- content -->
+
+
+  <p-footer>
+    <button *ngIf="!isHidenSaveButton()" class="btn btn-save" (click)="save()">
+      {{'helpers.buttons.saveButton' | translate}}
+    </button>
+    <button type="button" class="btn btn-cancel" data-dismiss="modal" (click)="closeModal()">
+      {{'helpers.buttons.cancelButton' | translate}}
+    </button>
+  </p-footer>
+</p-dialog>
+
+<div class="ui-widget-overlay ui-dialog-mask" style="z-index: 1003;"></div>

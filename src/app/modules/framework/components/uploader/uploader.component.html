@@ -1,0 +1,81 @@
+<div class="card" [hidden]="true">
+  <p-fileUpload #fileInput ngDefaultControl chooseLabel="{{ 'global.text.uploaderLabel' | translate }}" name="demo[]"
+    [auto]="true" [customUpload]="isCustomUpload" [disabled]="isDisabled" (uploadHandler)="onUpload($event)"
+    (onRemove)="onRemove($event)" [multiple]="isMultiple" mode="advanced" [accept]="acceptType" [maxFileSize]="fileSize"
+    (onSelect)="onSelect($event)">
+  </p-fileUpload>
+</div>
+
+
+<ng-container>
+  <div appSpinner>
+    <div class="card my-2">
+      <div class="uploadPlug_bx" *ngIf="!attachmentsViewOnly">
+        <button class="btn btn-solid" [disabled]="isChoosebtnDisabled" (click)="onClick(uploader);">
+          {{ 'attachment.uploaderLable' | translate }}
+        </button>
+        <span class="req_txt" *ngIf="isMultiple">
+          {{'attachment.multiAttachments'|translate}}
+        </span>
+        <span class="req_txt" *ngIf="!isMultiple">
+          ({{'caseManagement.request.localTransfer.controls.singleattachments' | translate}})
+        </span>
+      </div>
+      <div class="is-invalid">
+        <span class="req_txt" *ngIf="fileTypeError">
+          {{'attachment.fileTypeError'|translate}}
+        </span>
+        <span class="req_txt" *ngIf="fileSizeError">
+          {{fileSizeErrorMsg|translate}}
+        </span>
+      </div>
+
+      <app-data-list [cardTitle]="cardTitle" [columns]="colNames" [hasDetailsBtn]="false" [hasRefreshAction]="false"
+        [hasAdvancedSearch]="false" [hasExport]="false" [itemsList]="uploadedFiles" [alwaysShowPaginator]="false"
+        [hasChangeViewAction]="false" [hasSortOrderAction]="false">
+        <ng-template #userType let-entity>
+          <span *ngIf="entity.userType==currentUserType"> {{'attachment.myAccount'|translate}}</span>
+          <span *ngIf="entity.userType==UserTypeEnum.Dentist&&entity.userType!=currentUserType">
+            {{'dentist.dentist'|translate}}</span>
+          <span *ngIf="entity.userType==UserTypeEnum.Lab&&entity.userType!=currentUserType">
+            {{'lab.lab'|translate}}</span>
+        </ng-template>
+        <ng-template #actions let-entity let-rowIndex>
+          <a title="{{'global.text.deleteIcon' | translate}}"
+            *ngIf="!isDisabled&&entity.userType==currentUserType&&!attachmentsViewOnly"
+            (click)="deleteUploadedFile(entity)"><img src="assets/images/icons/Trash.png" alt="image"></a>
+          <a title="{{'global.text.downloadIcon' | translate}}" *ngIf="entity.fileStatus!=FileStatusEnum.New"
+            (click)="downloadUploadedFile(entity)"><img src="assets/images/icons/Download.png" alt="image"></a>
+          <a title="{{'global.text.showIcon' | translate}}"
+            *ngIf="isUploadedFileAvailbleForView(entity)&&entity.fileStatus!=FileStatusEnum.New"
+            (click)="viewUploaedFile(entity)"><img src="assets/images/icons/eye.png" alt="image"></a>
+        </ng-template>
+        <ng-template #fileType let-entity let-rowIndex>
+          <span *ngIf="FileHelper.isImage(entity.extention)">{{'attachment.image'|translate}}</span>
+          <span *ngIf="FileHelper.isPDf(entity.extention)">pdf</span>
+        </ng-template>
+        <ng-template #fileSizeTemplate let-entity let-rowIndex>
+          <!-- <span>{{FileHelper.calcFileSize(entity.fileSize)}}</span> -->
+          <span>{{entity.fileSize | FileSize}}</span>
+        </ng-template>
+      </app-data-list>
+    </div>
+    <div class=" text-end" *ngIf="!attachmentsViewOnly">
+      <button class="btn btn-outline" type="button"
+        (click)="onCancelAttachementDialoge()">{{'helpers.buttons.cancelButton' |
+        translate}}</button>
+      <button [disabled]="disableAttachmentSaveBtn ? 'disabled' : null" class="btn btn-solid" type="submit"
+        (click)="onSaveAttachements()">{{'helpers.buttons.saveButton' |
+        translate}}</button>
+    </div>
+  </div>
+
+</ng-container>
+
+<p-image *ngIf="viewUrl" class="view_attachment_image" src="{{viewUrl}}" alt="Image" width="250" [preview]="true">
+  <ng-template pTemplate="indicator">
+    <button id="imageViewer" #imageViewer>
+      Indicator Content
+    </button>
+  </ng-template>
+</p-image>

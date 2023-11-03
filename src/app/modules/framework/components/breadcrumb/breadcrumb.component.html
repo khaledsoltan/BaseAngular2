@@ -1,0 +1,19 @@
+<nav class="px-2 P-title mb-2" aria-label="breadcrumb" *ngIf="!hidden && breadcrumbs && breadcrumbs.length>0">
+  <ol class="breadcrumb mb-1">
+
+    <ng-container *ngFor="let breadcrumb of breadcrumbs; let i = index">
+
+      <li style="cursor: pointer;" *ngIf="breadcrumb" class="breadcrumb-item active fs-18 p-0" aria-current="page">
+        <a [routerLink]="!breadcrumb.disabled? breadcrumb.path : null" [class.disabled]="breadcrumb.disabled">
+          <span *ngIf="i != breadcrumbs.length-1" class="  muted-text me-1">{{breadcrumb.title
+            |
+            translate}}</span>
+          <span *ngIf="i == breadcrumbs.length-1" class=" bold Primary-dark-text me-1">{{breadcrumb.title |
+            translate}}</span>
+        </a>
+      </li>
+    </ng-container>
+  </ol>
+</nav>
+
+<!-- [class.disabled]="true || i === 1 || i===(breadcrumbs.length-1)" -->

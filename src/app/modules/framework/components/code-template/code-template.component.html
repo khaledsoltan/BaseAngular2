@@ -1,0 +1,23 @@
+<ng-container *ngIf="code && code.length>0 && id>0">
+  <ng-container *ngIf="!onClick && url">
+    <a [routerLink]="[url,id]" class="details-text text-nowrap link"
+      pTooltip="{{'helpers.labels.goToDetails' | translate}}" tooltipPosition="top" [target]="target">
+      {{code}}
+    </a>
+    <a *ngIf="hasNewTabLink === true" [routerLink]="[url,id]" class="details-text text-nowrap link fs-18"
+      target="_blank" pTooltip="{{'helpers.labels.goToDetailsNewtab' | translate}}" tooltipPosition="top">
+      <i class="las la-external-link-alt mx-1"></i>
+    </a>
+  </ng-container>
+
+  <ng-container *ngIf="onClick && !url">
+    <a style="cursor: pointer;" (click)="onClick(id,false,params)" class="details-text text-nowrap link link"
+      pTooltip="{{'helpers.labels.goToDetails' | translate}}" tooltipPosition="top">
+      {{code}}
+    </a>
+    <a *ngIf="hasNewTabLink === true" (click)="onClick(id,true,params)" class="details-text text-nowrap link fs-18"
+      target="_blank" pTooltip="{{'helpers.labels.goToDetailsNewtab' | translate}}" tooltipPosition="top">
+      <i class="las la-external-link-alt mx-1"></i>
+    </a>
+  </ng-container>
+</ng-container>

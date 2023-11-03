@@ -1,0 +1,565 @@
+<div #modalTemplateRef *ngIf="model && model?.pageType === pageTypes.PopUp" class="modal fade text-left" tabindex="-1"
+  role="dialog" aria-labelledby="myModalLabel1" data-backdrop="static" data-keyboard="false" aria-hidden="true">
+
+  <div class="modal-dialog modal-65 general-search-parent" role="document">
+    <div appSpinner class="modal-content">
+      <div *ngIf="model?.hidePageHeaderTitle !== true" class="modal-header p-3">
+        <h5 class="modal-title" id="myModalLabel1">
+          <span>{{ model?.title | translate}}</span>
+        </h5>
+        <button type="button" (click)="cancel()" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <!-- form template -->
+      <ng-template [ngTemplateOutlet]="dynamicFormTemplate" [ngTemplateOutletContext]="{ $implicit: model }">
+      </ng-template>
+    </div>
+  </div>
+</div>
+
+<div appSpinner *ngIf="model && model?.pageType === pageTypes.StandAlone" class="general-search-parent">
+
+  <!-- <div *ngIf="model?.hidePageHeaderTitle !== true" class="page-header sticky-top position-sticky py-1">
+    <div class="head-title d-flex justify-content-between align-items-center">
+      <span class="title-text">
+        {{ model?.title | translate}}
+      </span> -->
+  <!-- <actions class="text-right" [actions]="mainActions" [hideAction]="hideAction"></actions> -->
+
+  <!-- </div> -->
+  <!-- </div> -->
+
+  <!-- form template -->
+  <ng-template [ngTemplateOutlet]="dynamicFormTemplate" [ngTemplateOutletContext]="{ $implicit: model }">
+  </ng-template>
+
+
+
+</div>
+
+<ng-template #dynamicFormTemplate let-model>
+  <!-- modal-body -->
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <div *ngIf="model?.cards"
+      [ngClass]="{'modal-body': model && model?.pageType === pageTypes.PopUp, 'py-3': model && model?.pageType === pageTypes.PopUp}"
+      class="modal-body">
+      <!-- <div class="m-form__group form-row"> -->
+      <ng-template ngFor let-cardKey [ngForOf]="getObjectKeyes(model.cards)" let-index="index">
+        <!-- <div class="col-lg-{{model?.cards[cardKey]?.cardSize || 12}} px-0"> -->
+
+        <!-- single card -->
+        <div *ngIf="model?.cards[cardKey].hidden !== true && model?.cards[cardKey]?.type === cardTypes.Single"
+          class="form-card px-0" [ngStyle]="{'box-shadow': model?.cards[cardKey].hideHeader === true ? 'none' : null}">
+
+          <!-- card header -->
+          <div *ngIf="model?.cards[cardKey].hideHeader !== true"
+            class="header w-100 d-flex justify-content-between align-items-center px-0">
+            <h5 class="title-text">
+              <img src="./assets/images/imgs/iq-act-tab.svg" alt="image" />
+              {{model?.cards[cardKey]?.title | translate}}
+            </h5>
+            <actions class="text-right" [actions]="model?.cards[cardKey]?.titleActions" [hideAction]="hideAction"
+              [params]="cardKey">
+            </actions>
+          </div>
+
+          <!-- card body -->
+
+          <div class="row mx-0" [formGroupName]="cardKey">
+
+            <!--Start Form Inputs-->
+            <ng-template ngFor let-fieldKey [ngForOf]="getObjectKeyes(model.cards[cardKey].fields)" let-index="index">
+
+              <!-- text -->
+              <ng-container
+                *ngIf="model?.cards[cardKey].fields[fieldKey].hidden !== true && getFieldDataType(cardKey, fieldKey) === dataTypes.Text">
+                <div [ngStyle]="{'margin-inline-end': getFieldOffsetEnd(cardKey, fieldKey)}"
+                  class="col-lg-{{getFieldColSize(cardKey, fieldKey)}} col-12 mb-1 px-3 {{getFieldCssClass(cardKey, fieldKey)}}">
+                  <div class="row mx-0 align-items-center group-control">
+                    <div class="form-label col-12 px-0">
+                      <label for="{{fieldKey}}">
+                        {{ getFieldTitle(cardKey, fieldKey) | translate }}
+                        <span *ngIf="isRequired(cardKey, fieldKey)" class="required text-danger">*</span>
+                      </label>
+                    </div>
+                    <div class="form-input col-12 px-0">
+
+
+                      <input type="text" class="control" id="{{fieldKey}}" [formControlName]="fieldKey"
+                        [ngClass]="{'is-invalid': (formSubmitted || form.get(cardKey+'.'+fieldKey).touched) && form.get(cardKey+'.'+fieldKey).errors}">
+                      <div class="invalid-feedback"
+                        *ngIf="form.get(cardKey+'.'+fieldKey).errors && ( formSubmitted || form.get(cardKey+'.'+fieldKey).touched)">
+                        <span>
+                          {{ getValidatorMessage(cardKey, fieldKey) | translate }}
+                        </span>
+                      </div>
+
+                    </div>
+                  </div>
+
+                </div>
+              </ng-container>
+
+
+              <!-- Password -->
+              <ng-container
+                *ngIf="model?.cards[cardKey].fields[fieldKey].hidden !== true && getFieldDataType(cardKey, fieldKey) === dataTypes.Password">
+                <div [ngStyle]="{'margin-inline-end': getFieldOffsetEnd(cardKey, fieldKey)}"
+                  class="col-lg-{{getFieldColSize(cardKey, fieldKey)}} col-12 mb-1 px-3 {{getFieldCssClass(cardKey, fieldKey)}}">
+                  <div class="row mx-0 align-items-center group-control">
+                    <div class="form-label col-12 px-0">
+                      <label for="{{fieldKey}}">
+                        {{ getFieldTitle(cardKey, fieldKey) | translate }}
+                        <span *ngIf="isRequired(cardKey, fieldKey)" class="required text-danger">*</span>
+                      </label>
+                    </div>
+                    <div class="form-input col-12 px-0">
+
+
+                      <input type="password" class="control" id="{{fieldKey}}" [formControlName]="fieldKey"
+                        [ngClass]="{'is-invalid': (formSubmitted || form.get(cardKey+'.'+fieldKey).touched) && form.get(cardKey+'.'+fieldKey).errors}">
+                      <div class="invalid-feedback"
+                        *ngIf="form.get(cardKey+'.'+fieldKey).errors && ( formSubmitted || form.get(cardKey+'.'+fieldKey).touched)">
+                        <span>
+                          {{ getValidatorMessage(cardKey, fieldKey) | translate }}
+                        </span>
+                      </div>
+
+                    </div>
+                  </div>
+
+                </div>
+              </ng-container>
+
+              <!-- number -->
+              <ng-container
+                *ngIf="model?.cards[cardKey].fields[fieldKey].hidden !== true && getFieldDataType(cardKey, fieldKey) === dataTypes.Number">
+                <div [ngStyle]="{'margin-inline-end': getFieldOffsetEnd(cardKey, fieldKey)}"
+                  class="col-lg-{{getFieldColSize(cardKey, fieldKey)}} col-12 mb-1 px-3 {{getFieldCssClass(cardKey, fieldKey)}}">
+                  <div class="row mx-0 align-items-center group-control">
+                    <div class="form-label col-12 px-0">
+                      <label for="{{fieldKey}}">
+                        {{ getFieldTitle(cardKey, fieldKey) | translate }}
+                        <span *ngIf="isRequired(cardKey, fieldKey)" class="required text-danger">*</span>
+                      </label>
+                    </div>
+
+                    <div class="form-input col-12 mb-1 px-0">
+
+                      <input type="number" class="control" id="{{fieldKey}}" [formControlName]="fieldKey"
+                        [ngClass]="{'is-invalid': (formSubmitted || form.get(cardKey+'.'+fieldKey).touched) && form.get(cardKey+'.'+fieldKey).errors}">
+                      <div class="invalid-feedback"
+                        *ngIf="form.get(cardKey+'.'+fieldKey).errors && ( formSubmitted || form.get(cardKey+'.'+fieldKey).touched)">
+                        <span>
+                          {{ getValidatorMessage(cardKey, fieldKey) | translate }}
+                        </span>
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
+              </ng-container>
+
+
+              <!-- textarea -->
+              <ng-container
+                *ngIf="model?.cards[cardKey].fields[fieldKey].hidden !== true && getFieldDataType(cardKey, fieldKey) === dataTypes.TextArea">
+                <div [ngStyle]="{'margin-inline-end': getFieldOffsetEnd(cardKey, fieldKey)}"
+                  class="col-lg-{{getFieldColSize(cardKey, fieldKey)}} col-12 mb-3 px-3 {{getFieldCssClass(cardKey, fieldKey)}}">
+                  <div class="row mx-0 align-items-center group-control h-100">
+                    <div class="form-label col-12 px-0">
+                      <label for="{{fieldKey}}">
+                        {{ getFieldTitle(cardKey, fieldKey) | translate }}
+                        <span *ngIf="isRequired(cardKey, fieldKey)" class="required text-danger">*</span>
+                      </label>
+                    </div>
+
+                    <div class="form-input col-12 mb-1 px-0">
+
+                      <textarea rows="2" class="control" id="{{fieldKey}}" [formControlName]="fieldKey"
+                        [ngClass]="{'is-invalid': (formSubmitted || form.get(cardKey+'.'+fieldKey).touched) && form.get(cardKey+'.'+fieldKey).errors}">
+            </textarea>
+                      <div class="invalid-feedback"
+                        *ngIf="form.get(cardKey+'.'+fieldKey).errors && ( formSubmitted || form.get(cardKey+'.'+fieldKey).touched)">
+                        <span>
+                          {{ getValidatorMessage(cardKey, fieldKey) | translate }}
+                        </span>
+
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
+              </ng-container>
+
+
+              <!-- date -->
+              <ng-container
+                *ngIf="model?.cards[cardKey].fields[fieldKey].hidden !== true && getFieldDataType(cardKey, fieldKey) === dataTypes.Date">
+
+                <div [ngStyle]="{'margin-inline-end': getFieldOffsetEnd(cardKey, fieldKey)}"
+                  class="col-lg-{{getFieldColSize(cardKey, fieldKey)}} col-12 mb-1 px-3 {{getFieldCssClass(cardKey, fieldKey)}}">
+                  <div class="row mx-0 align-items-center group-control">
+                    <div class="form-label col-12 px-0">
+                      <label for="{{fieldKey}}">
+                        {{ getFieldTitle(cardKey, fieldKey) | translate }}
+                        <span *ngIf="isRequired(cardKey, fieldKey)" class="required text-danger">*</span>
+                      </label>
+                    </div>
+
+                    <div class="form-input col-12 mb-1 px-0">
+
+                      <p-calendar class="control form-date p-0 " [monthNavigator]="true" inputId="{{fieldKey}}"
+                        [appendTo]="'body'"
+                        [dateFormat]="getField(cardKey, fieldKey)?.dateOptions?.dateFormat ? getField(cardKey, fieldKey).dateOptions.dateFormat : 'dd/mm/yy'"
+                        [showTime]="getField(cardKey, fieldKey)?.dateOptions?.showTime ? getField(cardKey, fieldKey).dateOptions.showTime : false"
+                        [timeOnly]="getField(cardKey, fieldKey)?.dateOptions?.timeOnly ? getField(cardKey, fieldKey).dateOptions.timeOnly : false"
+                        [hourFormat]="getField(cardKey, fieldKey)?.dateOptions?.hourFormat ? getField(cardKey, fieldKey).dateOptions.hourFormat : '12'"
+                        [yearNavigator]="true" yearRange="1990:2030" [showButtonBar]="true" [formControlName]="fieldKey"
+                        [ngClass]="{'is-invalid': (formSubmitted || form.get(cardKey+'.'+fieldKey).touched) && form.get(cardKey+'.'+fieldKey).errors}">
+                      </p-calendar>
+                      <div class="invalid-feedback"
+                        *ngIf="form.get(cardKey+'.'+fieldKey).errors && ( formSubmitted || form.get(cardKey+'.'+fieldKey).touched)">
+                        <span>
+                          {{ getValidatorMessage(cardKey, fieldKey) | translate }}
+                        </span>
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
+              </ng-container>
+
+              <!-- file -->
+              <ng-container
+                *ngIf="model?.cards[cardKey].fields[fieldKey].hidden !== true && getFieldDataType(cardKey, fieldKey) === dataTypes.File">
+                <div [ngStyle]="{'margin-inline-end': getFieldOffsetEnd(cardKey, fieldKey)}"
+                  class="col-lg-{{getFieldColSize(cardKey, fieldKey)}} col-12 mb-1 px-3 {{getFieldCssClass(cardKey, fieldKey)}}">
+                  <div class="row mx-0 align-items-center group-control">
+                    <div class="form-label col-12 px-0">
+                      <label for="{{fieldKey}}">
+                        {{ getFieldTitle(cardKey, fieldKey) | translate }}
+                        <span *ngIf="isRequired(cardKey, fieldKey)" class="required text-danger">*</span>
+                      </label>
+                    </div>
+
+                    <div class="form-input col-12 mb-1 px-0">
+
+                      <p-fileUpload class="control h-100" [showCancelButton]="false" [showUploadButton]="false"
+                        [customUpload]="true"
+                        [maxFileSize]="getField(cardKey, fieldKey)?.fileOptions?.maxFileSize ? getField(cardKey, fieldKey).fileOptions.maxFileSize : 2000000"
+                        [disabled]="(getField(cardKey, fieldKey).disabled || model.cards[cardKey].disabled) ? true : false"
+                        (onSelect)="onSelectFile($event, cardKey, fieldKey)"
+                        (onRemove)="onRemoveFile($event, cardKey, fieldKey)" accept="image/*,application/pdf,.csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,
+           application/vnd.ms-excel,.doc,.docx,.xml,
+           application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                        [ngClass]="{'is-invalid': (formSubmitted || form.get(cardKey+'.'+fieldKey).touched) && form.get(cardKey+'.'+fieldKey).errors}">
+                      </p-fileUpload>
+                      <div class="invalid-feedback"
+                        *ngIf="form.get(cardKey+'.'+fieldKey).errors && ( formSubmitted || form.get(cardKey+'.'+fieldKey).touched)">
+                        <span>
+                          {{ getValidatorMessage(cardKey, fieldKey) | translate }}
+                        </span>
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
+              </ng-container>
+
+
+              <!-- autocomplete -->
+              <ng-container
+                *ngIf="model?.cards[cardKey].fields[fieldKey].hidden !== true && getFieldDataType(cardKey, fieldKey) === dataTypes.AutoComplete">
+                <div [ngStyle]="{'margin-inline-end': getFieldOffsetEnd(cardKey, fieldKey)}"
+                  class="col-lg-{{getFieldColSize(cardKey, fieldKey)}} col-12 mb-1 px-3 {{getFieldCssClass(cardKey, fieldKey)}}">
+                  <div class="row mx-0 align-items-center group-control">
+                    <div class="form-label col-12 px-0">
+                      <label for="{{fieldKey}}">
+                        {{ getFieldTitle(cardKey, fieldKey) | translate }}
+                        <span *ngIf="isRequired(cardKey, fieldKey)" class="required text-danger">*</span>
+                      </label>
+                    </div>
+                    <div class="form-input col-12 mb-1 px-0" [ngClass]="{
+                          'multi-controls': !isFieldDisabled(cardKey, fieldKey)
+                            && (model?.cards[cardKey].fields[fieldKey]?.generalSearchPageListTemplate
+                            || (model?.cards[cardKey].fields[fieldKey]?.generalSearchDataListConfig &&
+                            model?.cards[cardKey].fields[fieldKey]?.generalSearchColumns))
+                        }">
+                      <p-autoComplete class="auto-complete" (onSelect)="onSelectAutoComplete($event,cardKey, fieldKey)"
+                        (onUnselect)="onUnSelectAutoCompleteMulti($event, cardKey, fieldKey)"
+                        (onClear)="onClearAutoComplete($event, cardKey, fieldKey)"
+                        [field]="getSelectFieldsValue(cardKey, fieldKey)" [formControlName]="fieldKey"
+                        [suggestions]="getSelectList(cardKey, fieldKey)" [delay]="autoCompleteDelay"
+                        (completeMethod)="completeMethod($event, cardKey, fieldKey)" [forceSelection]="true" [size]="30"
+                        [minLength]="1" [dropdown]="true" id="{{fieldKey}}"
+                        [multiple]="isAutoCompleteModeMulti(cardKey, fieldKey)"
+                        [ngClass]="{'is-invalid': (formSubmitted || form.get(cardKey+'.'+fieldKey).touched) && form.get(cardKey+'.'+fieldKey).errors}">
+                        <ng-template let-selectedField pTemplate="item">
+                          <div class="ui-helper-clearfix">
+                            <div>
+                              {{ selectedField[getSelectFieldsValue(cardKey, fieldKey)] | translate }}
+                            </div>
+                          </div>
+                        </ng-template>
+                        <ng-template let-value pTemplate="selectedItem">
+                          <span [ngClass]="{'ml-3': changeLang==='ar','mr-4': changeLang==='en'}">
+                            {{ value[getSelectFieldsValue(cardKey, fieldKey)] | translate}}
+                          </span>
+                        </ng-template>
+                      </p-autoComplete>
+
+                      <!-- general search -->
+                      <actions [actions]="generalSearchAction" [params]="{
+                          field: model?.cards[cardKey].fields[fieldKey],
+                          cardKey: cardKey,
+                          fieldKey: fieldKey
+                        }">
+                      </actions>
+
+                      <app-general-search *ngIf="(generalSearchSelectedCardKey && generalSearchSelectedCardKey === cardKey) &&
+                          (generalSearchSelectedFieldKey && generalSearchSelectedFieldKey === fieldKey)" [showModal]="(generalSearchSelectedCardKey && generalSearchSelectedCardKey === cardKey) &&
+                          (generalSearchSelectedFieldKey && generalSearchSelectedFieldKey === fieldKey)"
+                        [fixedHeight]="true"
+                        [autoCompleteMode]="model?.cards[cardKey].fields[fieldKey]?.autoCompleteMode"
+                        [pageListTemplate]="model?.cards[cardKey].fields[fieldKey]?.generalSearchPageListTemplate"
+                        [dataListConfig]="model?.cards[cardKey].fields[fieldKey]?.generalSearchDataListConfig"
+                        [columns]="model?.cards[cardKey].fields[fieldKey]?.generalSearchColumns"
+                        [getSelectedItems]="model?.cards[cardKey].fields[fieldKey]?.generalSearchGetSelectedItems"
+                        (onSave)="onSaveGeneralSearch($event)" (onCancel)="onCancelGeneralSearch()">
+                      </app-general-search>
+
+                      <div class="invalid-feedback"
+                        *ngIf="form.get(cardKey+'.'+fieldKey).errors?.required && (formSubmitted || form.get(cardKey+'.'+fieldKey).touched)">
+                        {{'helpers.validation.required' | translate}}
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
+              </ng-container>
+
+
+
+              <!-- select -->
+
+              <ng-container
+                *ngIf="model?.cards[cardKey].fields[fieldKey].hidden !== true && getFieldDataType(cardKey, fieldKey) === dataTypes.DropDown">
+                <div [ngStyle]="{'margin-inline-end': getFieldOffsetEnd(cardKey, fieldKey)}"
+                  class="col-lg-{{getFieldColSize(cardKey, fieldKey)}} col-12 mb-1 px-3 {{getFieldCssClass(cardKey, fieldKey)}}">
+                  <div class="row mx-0 align-items-center group-control">
+                    <div class="form-label col-12 px-0">
+                      <label for="{{fieldKey}}">
+                        {{ getFieldTitle(cardKey, fieldKey) | translate }}
+                        <span *ngIf="isRequired(cardKey, fieldKey)" class="required text-danger">*</span>
+                      </label>
+                    </div>
+
+
+                    <div class="form-input col-12 mb-1 px-0">
+
+                      <select class="control" [formControlName]="fieldKey" id="{{fieldKey}}"
+                        [ngClass]="{'is-invalid': (formSubmitted || form.get(cardKey+'.'+fieldKey).touched) && form.get(cardKey+'.'+fieldKey).errors}">
+                        <option [ngValue]="null" selected="[form.get(cardKey+'.'+fieldKey).value === null">
+                          {{'helpers.labels.select'|translate}}
+                        </option>
+                        <option *ngFor="let option of getSelectList(cardKey, fieldKey)" [ngValue]="option">
+                          {{ option[getSelectFieldsValue(cardKey, fieldKey)] | translate }}
+                        </option>
+                      </select>
+                      <div class="invalid-feedback"
+                        *ngIf="form.get(cardKey+'.'+fieldKey).errors?.required && (formSubmitted || form.get(cardKey+'.'+fieldKey).touched)">
+                        {{'helpers.validation.required' | translate}}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </ng-container>
+
+
+              <!-- checkbox -->
+              <div [ngStyle]="{'margin-inline-end': getFieldOffsetEnd(cardKey, fieldKey)}"
+                class="col-lg-{{getFieldColSize(cardKey, fieldKey)}} col-md-6 col-12 mb-1 align-self-center {{getFieldCssClass(cardKey, fieldKey)}}"
+                *ngIf="model?.cards[cardKey].fields[fieldKey].hidden !== true && getFieldDataType(cardKey, fieldKey) === dataTypes.CheckBox">
+                <div class="row mx-0 px-0">
+                  <div *ngIf="model?.cards[cardKey]?.fields[fieldKey]?.selectOptions?.binary !== true"
+                    class="form-label col-12 px-0">
+                    <label for="{{fieldKey}}">
+                      {{ getFieldTitle(cardKey, fieldKey) | translate }}
+                      <span *ngIf="isRequired(cardKey, fieldKey)" class="required text-danger">*</span>
+                    </label>
+
+                  </div>
+                  <div class="col-12 px-0 form-input mb-1 mt-1">
+                    <p-checkbox *ngIf="model?.cards[cardKey]?.fields[fieldKey]?.selectOptions?.binary === true"
+                      [formControlName]="fieldKey" [binary]="true"
+                      label="{{ getFieldTitle(cardKey, fieldKey) | translate }}">
+                    </p-checkbox>
+                    <ng-container *ngIf="model?.cards[cardKey]?.fields[fieldKey]?.selectOptions?.binary !== true">
+                      <div *ngFor="let option of model?.cards[cardKey]?.fields[fieldKey]?.selectOptions?.list"
+                        class="col-12">
+                        <p-checkbox [formControlName]="fieldKey" [value]="option?.value"
+                          label="{{option?.title |translate}}">
+                        </p-checkbox>
+                      </div>
+                    </ng-container>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Radio Button -->
+              <div [ngStyle]="{'margin-inline-end': getFieldOffsetEnd(cardKey, fieldKey)}"
+                class="col-lg-{{getFieldColSize(cardKey, fieldKey)}} col-12 mb-2 {{getFieldCssClass(cardKey, fieldKey)}}"
+                *ngIf="model?.cards[cardKey].fields[fieldKey].hidden !== true && getFieldDataType(cardKey, fieldKey) === dataTypes.RadioButton">
+                <div class="form-label col-12 px-0">
+                  <label for="{{fieldKey}}">
+                    {{ getFieldTitle(cardKey, fieldKey) | translate }}
+                    <span *ngIf="isRequired(cardKey, fieldKey)" class="required text-danger">*</span>
+                  </label>
+                </div>
+                <div class="form-input">
+                  <ng-container *ngFor="let option of model?.cards[cardKey]?.fields[fieldKey]?.selectOptions?.list">
+
+                    <p-radioButton class="px-1" name="{{fieldKey}}" [value]="option.value"
+                      label=" {{option?.title |translate}}" [formControlName]="fieldKey">
+                    </p-radioButton>
+
+                  </ng-container>
+                </div>
+
+              </div>
+
+              <ng-template [ngTemplateOutlet]="model?.cards[cardKey].fields[fieldKey].contentTemplate"
+                *ngIf="model?.cards[cardKey].fields[fieldKey].hidden !== true && getFieldDataType(cardKey, fieldKey) === dataTypes.Template"
+                [ngTemplateOutletContext]="{$implicit: formEvent}"></ng-template>
+
+            </ng-template>
+            <!--End Form Inputs-->
+
+          </div>
+
+
+
+        </div>
+
+        <!-- multi card -->
+        <ng-container *ngIf="model?.cards[cardKey].hidden !== true && model?.cards[cardKey]?.type === cardTypes.Multi">
+          <div class="my-3 px-0">
+            <app-data-list [title]="model.cards[cardKey].dataListConfig?.title"
+              [subTitle]="model.cards[cardKey].dataListConfig?.subTitle" [columns]="model.cards[cardKey].columns"
+              [cardTitle]="model.cards[cardKey].dataListConfig?.cardTitle"
+              [cardSubTitle]="model.cards[cardKey].dataListConfig?.cardSubTitle"
+              [breadCrumbTitle]="model.cards[cardKey].dataListConfig?.breadCrumbTitle"
+              [hasDetailsBtn]="model.cards[cardKey].dataListConfig?.hasDetailsBtn"
+              [viewBtnTitle]="model.cards[cardKey].dataListConfig?.viewBtnTitle"
+              [keepSelectionOnLazyLoading]="model.cards[cardKey].dataListConfig?.keepSelectionOnLazyLoading"
+              [viewType]="model.cards[cardKey].dataListConfig?.viewType"
+              [disablePaginator]="model.cards[cardKey].dataListConfig?.disablePaginator"
+              [alwaysShowPaginator]="model.cards[cardKey].dataListConfig?.alwaysShowPaginator"
+              [hasSortOrderAction]="model.cards[cardKey].dataListConfig?.hasSortOrderAction"
+              [hasChangeViewAction]="model.cards[cardKey].dataListConfig?.hasChangeViewAction"
+              [hasPrintSetupBtn]="model.cards[cardKey].dataListConfig?.hasPrintSetupBtn"
+              [dataKey]="model.cards[cardKey].dataListConfig?.dataKey"
+              [disableLazy]="model.cards[cardKey].dataListConfig?.disableLazy"
+              [defSortBy]="model.cards[cardKey].dataListConfig?.defSortBy"
+              [defSortOrder]="model.cards[cardKey].dataListConfig?.defSortOrder"
+              [displayLoader]="model.cards[cardKey].dataListConfig?.displayLoader"
+              [hiddenGridHeader]="model.cards[cardKey].dataListConfig?.hiddenGridHeader"
+              [breadcrumbs]="model.cards[cardKey].dataListConfig?.breadcrumbs"
+              [tabsType]="model.cards[cardKey].dataListConfig?.tabsType"
+              [cardHeader]="model.cards[cardKey].dataListConfig?.cardHeader"
+              [cardHeaderKey]="model.cards[cardKey].dataListConfig?.cardHeaderKey"
+              [hasDetailsAction]="model.cards[cardKey].dataListConfig?.hasDetailsAction"
+              [hasDeleteAction]="model.cards[cardKey].dataListConfig?.hasDeleteAction"
+              [hasActivateAction]="model.cards[cardKey].dataListConfig?.hasActivateAction"
+              [hasUpdateAction]="model.cards[cardKey].dataListConfig?.hasUpdateAction"
+              [hasCloneAction]="model.cards[cardKey].dataListConfig?.hasCloneAction"
+              [hasFullScreenAction]="model.cards[cardKey].dataListConfig?.hasFullScreenAction"
+              [hasRefreshAction]="model.cards[cardKey].dataListConfig?.hasRefreshAction"
+              [hasTitleActions]="model.cards[cardKey].dataListConfig?.hasTitleActions"
+              [hasToggleColumsAction]="model.cards[cardKey].dataListConfig?.hasToggleColumsAction"
+              [hideRowActions]="model.cards[cardKey].dataListConfig?.hideRowActions"
+              [additionalParams]="model.cards[cardKey].dataListConfig?.additionalParams"
+              [cardSubHeader]="model.cards[cardKey].dataListConfig?.cardSubHeader"
+              [cardSubHeaderKey]="model.cards[cardKey].dataListConfig?.cardSubHeaderKey"
+              [tabs]="model.cards[cardKey].dataListConfig?.tabs" [stages]="model.cards[cardKey].dataListConfig?.stages"
+              [constFilters]="model.cards[cardKey].dataListConfig?.constFilters"
+              [getBadgeConfig]="model.cards[cardKey].dataListConfig?.getBadgeConfig"
+              [getItemsList]="model.cards[cardKey].dataListConfig?.getItemsList"
+              [hiddenRowActions]="model.cards[cardKey].dataListConfig?.hiddenRowActions"
+              [hiddenActivateRowActions]="model.cards[cardKey].dataListConfig?.hiddenActivateRowActions"
+              [hiddenActivateTitleActions]="model.cards[cardKey].dataListConfig?.hiddenActivateTitleActions"
+              [activateItems]="model.cards[cardKey].dataListConfig?.activateItems"
+              [checkActionPermission]="model.cards[cardKey].dataListConfig?.checkActionPermission"
+              [itemsList]="model.cards[cardKey].itemsList" [rowActions]="model.cards[cardKey].rowActions"
+              [titleActions]="model.cards[cardKey].titleActions" [additionalParams]="cardKey"></app-data-list>
+          </div>
+          <app-dynamic-form *ngIf="visibleListCardKey === cardKey" [model]="listCardFormModels[cardKey]"
+            [enableDateTransformFormat]="false" (onCancel)="onCancelListCardPopUp()"
+            (onSave)="onSaveListCard($event, cardKey)">
+          </app-dynamic-form>
+
+          <!-- line-dimension-card -->
+          <!-- <ng-container *ngIf="inLineDimensionCardsInfo[cardKey] && inLineDimensionCardsInfo[cardKey].hasDimensions !== false
+              && inLineDimensionCardsInfo[cardKey].showCard === true">
+            <app-line-dimension-card [dimensionCardDetails]="inLineDimensionCardsInfo[cardKey]"
+              (onCancelInLineDimensions)="onCancelInLineDimensions($event)"
+              (onSaveInLineDimensions)="onSaveInLineDimensions($event)" [fieldValues]="model.cards[cardKey].itemsList &&
+              inLineDimensionCardsInfo[cardKey] &&
+              model.cards[cardKey].itemsList[inLineDimensionCardsInfo[cardKey].rowIndex] &&
+              model.cards[cardKey].itemsList[inLineDimensionCardsInfo[cardKey].rowIndex].lineDimensions ?
+              model.cards[cardKey].itemsList[inLineDimensionCardsInfo[cardKey].rowIndex].lineDimensions :
+              null">
+            </app-line-dimension-card>
+          </ng-container> -->
+          <!-- line-dimension-card -->
+        </ng-container>
+
+        <!-- card with template -->
+        <ng-container
+          *ngIf="model?.cards[cardKey].hidden !== true && model?.cards[cardKey]?.type === cardTypes.Template">
+          <ng-template [ngTemplateOutlet]="model?.cards[cardKey].contentTemplate"
+            [ngTemplateOutletContext]="{$implicit: formEvent}"></ng-template>
+        </ng-container>
+
+        <!-- </div> -->
+        <!-- check if found content template -->
+
+      </ng-template>
+      <!-- </div> -->
+
+      <!-- Dimension Card -->
+      <app-dimension-card #dimensionCard
+        [dimensionCardDetails]="{entityName: model.entityName, entityId: model.entityId}"
+        (onHasRelatedEntitiesInHeader)="onHasRelatedEntitiesInHeader($event)">
+      </app-dimension-card>
+      <!-- Dimension Card -->
+
+    </div>
+
+    <!-- modal page save -->
+    <div *ngIf="model?.pageType === pageTypes.PopUp" class="modal-footer px-3 py-2">
+      <button *ngIf="!saveBtnIsHidden()" [disabled]="disableSaveButton" type="submit" class="btn btn-solid">
+
+        {{(model.saveBtnTitle || 'helpers.buttons.saveButton') | translate}}
+      </button>
+      <button *ngIf="!model.hideCancelBtn " type="button" class="btn btn-outline primary-border" data-dismiss="modal"
+        (click)="cancel()">
+        {{'helpers.buttons.cancelButton' | translate}}
+      </button>
+    </div>
+    <!-- stand-alone page save -->
+    <div *ngIf="model?.pageType === pageTypes.StandAlone" class="text-end">
+      <button *ngIf="!saveBtnIsHidden()" [disabled]="disableSaveButton" type="submit" class="btn btn-solid">
+        {{(model.saveBtnTitle || 'helpers.buttons.saveButton') | translate}}
+      </button>
+
+      <button *ngIf="!model.hideCancelBtn" (click)="cancel()" type="button" class="btn btn-outline primary-border">
+        {{'helpers.buttons.cancelButton' | translate}}
+      </button>
+    </div>
+
+
+  </form>
+</ng-template>

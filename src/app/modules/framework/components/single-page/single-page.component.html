@@ -1,0 +1,947 @@
+<div class="dynamic-details h-100 overflow-hidden general-search-parent" style="max-height: 100vh;" appSpinner>
+  <div class="d-page-header h-100">
+    <!-- title template -->
+    <ng-template [ngTemplateOutlet]="titleDetailsTemplate"></ng-template>
+    <!-- validation Card -->
+
+    <!-- validation  -->
+    <div class="col-card mx-0 validation-card border-0"
+      *ngIf="validationMessages && getObjectKeyes(validationMessages).length > 0">
+      <div class="col-card-header alert alert-danger mb-0 cursor-pointer" (click)="validationClick()">
+        <h6 class="fs-15 mb-0"><i class="las la-ban px-2"></i> {{ 'singlePage.validationMessages' | translate}}</h6>
+        <actions [actions]="cardActions" [params]="config?.entity" [hideAction]="hideAction">
+        </actions>
+      </div>
+
+      <div class="col-card-body collapse  bg-default  ">
+        <div class="row mx-0 w-100">
+          <ng-container *ngFor="let tabKey of getObjectKeyes(validationMessages)">
+
+            <!-- <div class="row mx-2"> -->
+            <ng-container *ngFor="let cardKey of getObjectKeyes(validationMessages[tabKey]?.cards)">
+
+
+              <ng-container *ngFor="let fieldKey of getObjectKeyes(validationMessages[tabKey].cards[cardKey]?.fields)">
+                <div class="col-12 text-danger">
+                  <i class="las la-ban px-1"></i>
+                  <!-- <span
+                class="fs-13">{{ (validationMessages[tabKey]?.tabTitle | translate) + ' ' + ('singlePage.tab' | translate)}}</span> -->
+
+                  <span class="fs-13">
+                    {{ (validationMessages[tabKey].cards[cardKey]?.cardTitle | translate) + ' : ' }}
+                  </span>
+
+                  <span class="fs-13">
+                    {{ validationMessages[tabKey].cards[cardKey].fields[fieldKey] | translate}}
+                  </span>
+                </div>
+              </ng-container>
+
+            </ng-container>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+    <!-- validation  -->
+    <!-- content template -->
+    <ng-template [ngTemplateOutlet]="contentDetailsTemplate"></ng-template>
+  </div>
+
+  <ng-template #titleDetailsTemplate>
+    <div class="public-data h-auto">
+      <!-- page-actions -->
+      <div class="page-actions secondary-bg px-3 d-flex align-items-center justify-content-between pl-1 pr-2">
+        <div class="d-flex align-items-center">
+          <actions *ngIf="titleActions" [actions]="titleActions?.actionList" [params]="config?.entity"
+            [hideAction]="hideAction">
+          </actions>
+          <!-- start-related-links -->
+          <div class="related" *ngIf="config && config.hasRelatedLinks !== false && entityInfo && entityInfo?.relatedLinks
+ && entityInfo?.relatedLinks?.length > 0 && mode === singlePageMode.Update">
+            <div class="dropdown">
+              <button class="btn p-0 dropdown-toggle cursor-pointer  app-luncher-dropdown" type="button" id="triggerId"
+                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                title="{{'helpers.common.relatedLinks' | translate}}">
+                <i class="las la-link"></i>
+                <span class="text-capitalize">{{'helpers.common.relatedLinks' | translate}}</span>
+              </button>
+              <div class="dropdown-menu dropdown-menu-left related-menu p-0" aria-labelledby="triggerId" id="Dropdown">
+                <app-related-links *ngIf="relatedLinks && relatedLinks.length>0" [relatedLinks]="relatedLinks">
+                </app-related-links>
+              </div>
+            </div>
+          </div>
+          <!-- end-related-links -->
+        </div>
+
+        <div class="actions d-flex align-items-center">
+
+          <!-- #region pagination- -->
+          <nav aria-label="Page navigation"
+            *ngIf="config && config.hasPaginator !== false && mode === singlePageMode.Update">
+            <ul class="pagination justify-content-center mx-0 mb-0">
+              <li class="page-item" pTooltip="{{'helpers.common.previous' | translate}}" tooltipPosition="top">
+                <a class="page-link arco-primary-text fs-12 arco-primary-link-hover icon-flip-ar" aria-label="Previous"
+                  (click)="navigate(entityInfo.previousId)" [ngClass]="{'disabled': isDisabledPrevious}">
+                  <i class="las la-reply fs-14 font-weight-bold"></i>
+                  <span class="sr-only">{{'helpers.common.previous' | translate}}</span>
+                </a>
+              </li>
+
+              <li class="page-item">
+                <a class="page-link arco-primary-text fs-12 arco-primary-link-hover icon-flip-en"
+                  pTooltip="{{'helpers.common.next' | translate}}" tooltipPosition="top"
+                  (click)="navigate(entityInfo.nextId)" [ngClass]="{'disabled': isDisabledNext}">
+                  <i class="las la-reply fs-14 font-weight-bold"></i>
+                  <span class="sr-only">{{'helpers.common.next' | translate}}</span>
+                </a>
+              </li>
+              <li class="page-item">
+                <a class="page-link arco-primary-text fs-12 arco-primary-link-hover" pTooltip="collapse"
+                  tooltipPosition="top" (click)="collapse()">
+                  <i class="las la-angle-down fs-14 font-weight-bold" (click)="collapse()"></i>
+                  <span class="sr-only">{{'helpers.common.next' | translate}}</span>
+                </a>
+              </li>
+            </ul>
+          </nav>
+          <!-- #endregion -->
+          <ng-container *ngIf="mainActions && mainActions.moreActions && mainActions.moreActions.length > 0">
+            <actions [actions]="mainActions" [params]="config?.entity" [moreActionType]="'dotsMoreActions'"
+              [hideAction]="hideAction">
+            </actions>
+          </ng-container>
+
+        </div>
+
+      </div>
+      <!-- public details data body -->
+      <div class="page-header-body bg-white px-3 py-2 collapse show">
+        <div class="row mx-0">
+
+          <!-- main-card- -->
+          <div class="col-lg-12 px-0">
+            <ng-container *ngIf="mainCard && getObjectKeyes(mainCard.fields).length > 0">
+              <div *ngFor="let fieldKey of getObjectKeyes(mainCard.fields)" class="info-card">
+                <span class="info-key">
+                  {{ mainCard.fields[fieldKey].title | translate}}
+                </span>
+                <span class="info-value">
+                  <ng-container *ngIf="!mainCard.fields[fieldKey].contentTemplate">
+
+                    <ng-container *ngIf="!mainCard.fields[fieldKey].pipe">
+                      {{ (!mainCardEntity || !mainCardEntity[fieldKey]) ? '---' : mainCardEntity[fieldKey]}}
+                    </ng-container>
+
+                    <ng-container *ngIf="mainCard.fields[fieldKey].pipe">
+                      <span *ngIf="!mainCardEntity || !mainCardEntity[fieldKey]">---</span>
+                      <span *ngIf="mainCardEntity && mainCardEntity[fieldKey]">
+                        {{ mainCard.fields[fieldKey].pipe === "date" ?
+                        (mainCardEntity[fieldKey] | date: (mainCard.fields[fieldKey].format || "dd/MM/yyyy"))
+                        : (mainCardEntity[fieldKey] || '---') }}
+                      </span>
+                    </ng-container>
+                  </ng-container>
+
+                  <ng-container *ngIf="mainCard.fields[fieldKey].contentTemplate">
+                    <ng-template [ngTemplateOutlet]="mainCard.fields[fieldKey].contentTemplate"
+                      [ngTemplateOutletContext]="{$implicit: config?.entity}">
+                    </ng-template>
+                  </ng-container>
+                </span>
+              </div>
+            </ng-container>
+          </div>
+
+
+        </div>
+      </div>
+      <!--start stages card  -->
+      <div class="details-stages collapse show"
+        [ngClass]="{'stages-with-actions': (workflowActions && workflowActions.moreActions && workflowActions.moreActions.length > 0)}"
+        *ngIf="(detailsStages && detailsStages.length > 0) || (stageSequenceList && stageSequenceList.length > 0)">
+        <div class="tabs-card">
+          <div class="tabs-header">
+            <ul class="nav nav-tabs border-0 mb-0 w-100 position-relative" id="myTab" role="tablist">
+              <ngx-slick-carousel class="carousel w-100" #slickCarousel="slick-carousel" [config]="slickConfig"
+                (init)="slickInit($event)" (breakpoint)="onSlickBreakpoints($event)">
+                <ng-container
+                  *ngIf="(mode === singlePageMode.Create || mode === singlePageMode.Clone) && stageSequenceList && stageSequenceList.length > 0">
+                  <li ngxSlickItem class="nav-item slide" [ngClass]="{ 'disabled': true, 'new-stage': i === 0}"
+                    *ngFor="let stage of stageSequenceList; let i = index;" [pTooltip]="stage?.name"
+                    tooltipPosition="top">
+                    <a class="nav-link" data-toggle="tab" role="tab" aria-selected="true">
+                    </a>
+                    <label class="form-control-label">
+                      {{stage?.name}}
+                    </label>
+                    <div class="aft-border"></div>
+
+                  </li>
+                </ng-container>
+
+                <ng-container *ngIf="mode === singlePageMode.Update && detailsStages && detailsStages.length > 0">
+                  <li ngxSlickItem class="nav-item slide" *ngFor="let stage of detailsStages" [ngClass]="{'active': stage?.stageData?.id === this.selectedStage?.stageData?.id,
+                    'disabled': stage.isNext,'selected':stage.isHead , 'done' :stage.isVisited}"
+                    (click)="changeStageTab($event, stage)" [pTooltip]="getStageTitle(stage)" tooltipPosition="top">
+                    <a class="nav-link" [ngClass]="{'active': stage?.stageData?.id === this.selectedStage?.stageData?.id,
+                    'disabled': stage.isNext,'selected':stage.isHead , 'done' :stage.isVisited}" data-toggle="tab"
+                      role="tab" aria-selected="true">
+                    </a>
+                    <label class="form-control-label">
+                      {{stage?.stageData?.name}}
+                    </label>
+                    <div class="aft-border"></div>
+
+                  </li>
+                </ng-container>
+
+              </ngx-slick-carousel>
+              <i *ngIf="(stageSequenceList && stageSequenceList.length > slickSlideToShowLimit) || (detailsStages && detailsStages.length > slickSlideToShowLimit)"
+                (click)="slickNext()" class="las la-angle-right right-arrow"
+                [ngClass]="{'arrow-disabled': (detailsStages?.length || stageSequenceList?.length) <= slickSlideToShowLimit}"></i>
+              <i *ngIf="(stageSequenceList && stageSequenceList.length > slickSlideToShowLimit) || (detailsStages && detailsStages.length > slickSlideToShowLimit)"
+                (click)="slickPrev()" class="las la-angle-left left-arrow"
+                [ngClass]="{'arrow-disabled': (detailsStages?.length || stageSequenceList?.length) <= slickSlideToShowLimit}"></i>
+            </ul>
+            <!-- actions-component -->
+            <ng-container
+              *ngIf="workflowActionsFlag === true && workflowActions && workflowActions.moreActions && workflowActions.moreActions.length > 0">
+              <actions class="actions" [actions]="workflowActions" [moreActionType]="'dotsMoreActions'"
+                [hideAction]="hideAction" [params]="config?.entity">
+              </actions>
+            </ng-container>
+            <!-- actions-component -->
+          </div>
+          <!-- Stage History  -->
+          <div class="tabs-body collapse" *ngIf="historyDetails && historyDetails.length>0"
+            [ngClass]="{'show': !config.stagesCardIsCollapsed}">
+            <div class="tab-content border-top py-1 mt-1" *ngFor="let history of historyDetails">
+              <div class="tab-pane fade show active" id="stage-tab" role="tabpanel" aria-labelledby="new-tab">
+                <!-- History component -->
+                <!-- <h4 class="m-0 font-weight-bold fs-14 black-alt-text border-bottom p-1 mb-2 mx-3">
+                            {{selectedStage.stageData.name}}
+                          </h4> -->
+                <div class="row mx-0">
+                  <div class="col-md-10 col-12 px-lg-0">
+                    <div class="info-card">
+                      <span class="info-key">
+                        {{'helpers.common.createdByName' | translate}}:
+                      </span>
+                      <span class="info-value">
+                        {{history.createdBy}}
+                      </span>
+                    </div>
+
+                    <div class="info-card">
+                      <span class="info-key">
+                        <!-- <i class="las la-calendar mr-1 align-middle fs-18"></i> -->
+                        Date:
+                      </span>
+                      <span class="info-value">
+                        {{history.creationDate | date: 'dd/MM/yyyy' }}
+                      </span>
+                    </div>
+                    <div class="info-card">
+                      <span class="info-key">
+                        <!-- <i class="las la-clock mr-1 align-middle fs-18"></i> -->
+                        Time:
+                      </span>
+                      <span class="info-value">
+                        {{history.creationDate | date: 'hh:mm' }}
+                      </span>
+                    </div>
+
+                    <div class="info-card">
+                      <span class="info-key">
+                        {{'helpers.common.stageName' | translate}}:
+                      </span>
+                      <span class="info-value">
+                        {{selectedStage.stageData.name}}
+                      </span>
+                    </div>
+
+                    <div class="info-card">
+                      <span class="info-key">
+                        {{'helpers.common.taskName' | translate}}:
+                      </span>
+                      <span class="info-value">
+                        {{history.actionName}}
+                      </span>
+                    </div>
+
+                    <div *ngFor="let taskField of history.actionFieldEntries" class="info-card">
+                      <span class="info-key">
+                        {{taskField.name}}
+                      </span>
+
+                      <ng-container *ngIf="taskField.dataTypeId != ActionFieldDataTypesEnum.File &&
+                        taskField.dataTypeId != ActionFieldDataTypesEnum.DocumentType &&
+                        taskField.dataTypeId != ActionFieldDataTypesEnum.Date &&
+                        taskField.dataTypeId != ActionFieldDataTypesEnum.Editor">
+                        <span class="info-value">
+                          {{taskField.fieldContent || '---'}}
+                        </span>
+                      </ng-container>
+
+                      <ng-container *ngIf="taskField.dataTypeId === ActionFieldDataTypesEnum.File">
+                        <span *ngIf="isImage(taskField?.fieldContent)" class="info-value">
+                          <a href="{{getFullPath(taskField?.fieldContent)}}" target="blank">
+                            <img alt="" [src]="getFullPath(taskField?.fieldContent)" class="w-25">
+                          </a>
+                        </span>
+                        <span *ngIf="!isImage(taskField?.fieldContent)" class="info-value">
+                          <a href="{{getFullPath(taskField?.fieldContent)}}" target="blank">
+                            {{ currentLang === 'en' ? 'Download' : 'تحميل'}}
+                          </a>
+                        </span>
+                      </ng-container>
+
+                      <ng-container *ngIf="taskField.dataTypeId === ActionFieldDataTypesEnum.DocumentType">
+                        <span *ngIf="isImage(taskField?.fieldContent)" class="info-value">
+                          <a href="{{getFullPath(taskField?.fieldContent)}}" target="blank">
+                            <img alt="" [src]="getFullPath(taskField?.fieldContent)" class="w-25">
+                          </a>
+                        </span>
+                        <span *ngIf="!isImage(taskField?.fieldContent)" class="info-value">
+                          <a href="{{getFullPath(taskField?.fieldContent)}}" target="blank">
+                            {{ currentLang === 'en' ? 'Download' : 'تحميل'}}
+                          </a>
+                        </span>
+                      </ng-container>
+
+                      <ng-container *ngIf="taskField.dataTypeId === ActionFieldDataTypesEnum.Date">
+                        <span class="info-value">{{(taskField.fieldContent | date: 'short' ) || '---'}}</span>
+                      </ng-container>
+
+                      <ng-container *ngIf="taskField.dataTypeId === ActionFieldDataTypesEnum.Editor">
+                        <span class="info-value" [innerHTML]="taskField.fieldContent">
+                        </span>
+                      </ng-container>
+
+                    </div>
+                  </div>
+                  <!-- History component -->
+                  <!-- legend -->
+
+                  <div
+                    *ngIf="(detailsStages && detailsStages.length > 0) || (stageSequenceList && stageSequenceList.length > 0)"
+                    class="col-lg-2 my-auto legened">
+                    <!-- <h6 class="black-alt-text font-weight-bold">Workflow Legend</h6> -->
+                    <div class="d-flex align-items-center justify-content-between">
+                      <div class="selected stage-status w-50 ">{{'helpers.labels.selectedStage' | translate}}</div>
+                      <div class="active stage-status w-50">{{'helpers.labels.activeStage' | translate}}</div>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between">
+                      <div class="done stage-status w-50">
+                        {{'helpers.labels.doneStage' | translate}}
+                      </div>
+                      <div class="disabled stage-status w-50">{{'helpers.labels.nextStage' | translate}}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- end stages card  -->
+    </div>
+
+
+  </ng-template>
+
+
+  <ng-template #contentDetailsTemplate>
+
+
+
+    <div class="d-page-body bg-white collapse show" [ngStyle]="{height: pageHeight}">
+
+      <!-- start tabs card  -->
+      <div class="card-tabs mt-2 mb-0 h-100">
+        <ul class="d-tabs nav nav-tabs" id="myTab2" role="tablist">
+          <ng-container *ngFor="let tabKey of getObjectKeyes(tabs)">
+            <li class="nav-item" *ngIf="tabs[tabKey].hidden !== true">
+              <a (click)="onTabSelected(tabKey)" class="nav-link cursor-pointer"
+                [ngClass]="{'active': tabKey === selectedTabKey}" data-toggle="tab" href="#tab-{{tabKey}}" role="tab"
+                aria-controls="tab-" aria-selected="true">
+                <span class="tab-title" *ngIf="test(tabs[tabKey].title)">
+                  {{tabs[tabKey].title }}
+                </span>
+              </a>
+            </li>
+          </ng-container>
+        </ul>
+        <div *ngIf="form" class="tab-content pb-2 mb-0 overflow-auto "
+          style="height: calc(100% - 40px); overflow-x: hidden;" id="myTab2Content" [formGroup]="form">
+
+          <!-- start-all-dynamic-tabes -->
+          <ng-container *ngFor="let tabKey of getObjectKeyes(tabs)">
+            <div *ngIf="tabs[tabKey].hidden !== true" class="row mx-0 tab-pane fade show"
+              [ngClass]="{'active': tabKey === selectedTabKey}" id="tab-{{tabKey}}" role="tabpanel"
+              aria-labelledby="tab-">
+              <!-- Tab titleActions -->
+
+              <div class="header d-flex justify-content-between">
+                <!-- Title Of the Grid -->
+                <div class="title">
+                  <span class="title-text">
+                    <span class="mb-1"></span>
+                  </span>
+                </div>
+                <!-- Actions that may be needed for the Grid [General actions on the grid] -->
+                <div class="actions" *ngIf="tabs[tabKey].titleActions">
+                  <!-- actions-component -->
+                  <actions [actions]="tabs[tabKey].titleActions" [params]="config?.entity" [hideAction]="hideAction">
+                  </actions>
+                  <!-- actions-component -->
+                </div>
+              </div>
+
+              <!-- Tab titleActions -->
+
+              <!-- Tab-form -->
+              <ng-container *ngIf="tabs[tabKey].type === tabTypes.Form">
+                <div class="row  mx-0" [formGroupName]="tabKey">
+                  <ng-template ngFor let-cardKey [ngForOf]="getObjectKeyes(tabs[tabKey].cards)" let-index="cardIndex">
+
+                    <!-- single-card -->
+                    <ng-container
+                      *ngIf="tabs[tabKey].cards[cardKey].hidden !== true && tabs[tabKey].cards[cardKey].type === cardTypes.Single">
+                      <div class="col-lg-{{tabs[tabKey]?.cards[cardKey].cardSize || 6}} px-0" [formGroupName]="cardKey">
+                        <div class="create-card b-r-12 w-100 border-0 bg-white mb-3">
+                          <!-- Card titleActions -->
+
+                          <div
+                            class="card-header p-2 border-0 position-relative bg-white b-t-r-12 b-t-l-12 d-flex justify-content-between align-items-center">
+                            <!-- Title Of the Grid -->
+                            <div class="card-title m-0 fs-14 black-alt-text text-left">
+
+                              {{ tabs[tabKey].cards[cardKey].title| translate}}
+
+                            </div>
+                            <!-- Actions that may be needed for the Grid [General actions on the grid] -->
+                            <div class="actions" *ngIf="tabs[tabKey].cards[cardKey].titleActions">
+                              <!-- actions-component -->
+                              <actions [actions]="tabs[tabKey].cards[cardKey].titleActions" [hideAction]="hideAction"
+                                [params]="config?.entity">
+                              </actions>
+                              <!-- actions-component -->
+                            </div>
+                          </div>
+
+                          <!-- Card titleActions -->
+
+                          <div class="card-body p-0 py-2 bg-white b-b-r-12 b-b-l-12">
+                            <div class="row mt-1 mx-0">
+                              <ng-template ngFor let-fieldKey
+                                [ngForOf]="getObjectKeyes(tabs[tabKey].cards[cardKey].fields)" let-index="index">
+
+                                <!-- text -->
+                                <ng-container
+                                  *ngIf="tabs[tabKey].cards[cardKey].fields[fieldKey].hidden !== true && getFieldDataType(tabKey, cardKey, fieldKey) === dataTypes.Text">
+                                  <div class="col-lg-{{getFieldColSize(tabKey, cardKey, fieldKey)}} col-12 px-0">
+                                    <div class="row mx-0 mb-2">
+                                      <div class="form-control-label col-12">
+                                        <label for="{{fieldKey}}">
+                                          {{ getFieldTitle(tabKey, cardKey, fieldKey)| translate}}
+                                          <span *ngIf="isRequired(tabKey, cardKey, fieldKey)"
+                                            class="required text-danger font-weight-bold">*</span>
+                                        </label>
+                                      </div>
+                                      <div class="col-12">
+                                        <input type="text" class="form-control" id="{{fieldKey}}"
+                                          [formControlName]="fieldKey"
+                                          [ngClass]="{'is-invalid': (formSubmitted || form.get(tabKey + '.' + cardKey+'.'+fieldKey).touched) && form.get(tabKey + '.' + cardKey+'.'+fieldKey).errors}">
+                                        <div class="invalid-feedback"
+                                          *ngIf="form.get(tabKey + '.' + cardKey+'.'+fieldKey).errors && ( formSubmitted || form.get(tabKey + '.' + cardKey+'.'+fieldKey).touched)">
+                                          <span>
+                                            {{ getValidatorMessage(tabKey, cardKey, fieldKey)| translate}}
+                                          </span>
+                                        </div>
+
+                                      </div>
+                                    </div>
+                                  </div>
+                                </ng-container>
+
+                                <!-- number -->
+                                <ng-container
+                                  *ngIf="tabs[tabKey].cards[cardKey].fields[fieldKey].hidden !== true && getFieldDataType(tabKey, cardKey, fieldKey) === dataTypes.Number">
+                                  <div class="col-lg-{{getFieldColSize(tabKey, cardKey, fieldKey)}} col-12 px-0">
+                                    <div class="row mx-0 mb-2">
+                                      <div class="form-control-label col-12">
+                                        <label for="{{fieldKey}}">
+                                          {{ getFieldTitle(tabKey, cardKey, fieldKey)| translate}}
+                                          <span *ngIf="isRequired(tabKey, cardKey, fieldKey)"
+                                            class="required text-danger font-weight-bold">*</span>
+                                        </label>
+                                      </div>
+                                      <div class="col-12">
+                                        <input type="number" class="form-control" id="{{fieldKey}}"
+                                          [formControlName]="fieldKey"
+                                          [ngClass]="{'is-invalid': (formSubmitted || form.get(tabKey+'.'+cardKey+'.'+fieldKey).touched) && form.get(tabKey+'.'+cardKey+'.'+fieldKey).errors}">
+                                        <div class="invalid-feedback"
+                                          *ngIf="form.get(tabKey+'.'+cardKey+'.'+fieldKey).errors && ( formSubmitted || form.get(tabKey+'.'+cardKey+'.'+fieldKey).touched)">
+                                          <span>
+                                            {{ getValidatorMessage(tabKey, cardKey, fieldKey)| translate}}
+                                          </span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </ng-container>
+
+
+                                <!-- textarea -->
+                                <ng-container
+                                  *ngIf="tabs[tabKey].cards[cardKey].fields[fieldKey].hidden !== true && getFieldDataType(tabKey, cardKey, fieldKey) === dataTypes.TextArea">
+                                  <div class="col-lg-{{getFieldColSize(tabKey, cardKey, fieldKey)}} col-12 px-0 my-4">
+                                    <div class="row mx-0 mb-2">
+                                      <div class="form-control-label col-12">
+                                        <label for="{{fieldKey}}">
+                                          {{ getFieldTitle(tabKey, cardKey, fieldKey)| translate}}
+                                          <span *ngIf="isRequired(tabKey, cardKey, fieldKey)"
+                                            class="required text-danger font-weight-bold">*</span>
+                                        </label>
+                                      </div>
+                                      <div class="col-12">
+                                        <textarea rows="2" class="form-control" id="{{fieldKey}}"
+                                          [formControlName]="fieldKey"
+                                          [ngClass]="{'is-invalid': (formSubmitted || form.get(tabKey+'.'+cardKey+'.'+fieldKey).touched) && form.get(tabKey+'.'+cardKey+'.'+fieldKey).errors}">
+                                      </textarea>
+                                        <div class="invalid-feedback"
+                                          *ngIf="form.get(tabKey+'.'+cardKey+'.'+fieldKey).errors && ( formSubmitted || form.get(tabKey+'.'+cardKey+'.'+fieldKey).touched)">
+                                          <span>
+                                            {{ getValidatorMessage(tabKey, cardKey, fieldKey)| translate}}
+                                          </span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </ng-container>
+
+
+                                <!-- date -->
+                                <ng-container
+                                  *ngIf="tabs[tabKey].cards[cardKey].fields[fieldKey].hidden !== true && getFieldDataType(tabKey, cardKey, fieldKey) === dataTypes.Date">
+                                  <div class="col-lg-{{getFieldColSize(tabKey, cardKey, fieldKey)}} col-12 px-0">
+                                    <div class="row mx-0 mb-2">
+                                      <div class="form-control-label col-12">
+                                        <label for="{{fieldKey}}">
+                                          {{ getFieldTitle(tabKey, cardKey, fieldKey)| translate}}
+                                          <span *ngIf="isRequired(tabKey, cardKey, fieldKey)"
+                                            class="required text-danger font-weight-bold">*</span>
+                                        </label>
+                                      </div>
+                                      <div class="col-12">
+                                        <p-calendar class="form-control form-date p-0 " [monthNavigator]="true"
+                                          inputId="{{fieldKey}}" [appendTo]="'body'"
+                                          [dateFormat]="getField(tabKey, cardKey, fieldKey)?.dateOptions?.dateFormat ? getField(tabKey, cardKey, fieldKey).dateOptions.dateFormat : 'dd/mm/yy'"
+                                          [showTime]="getField(tabKey, cardKey, fieldKey)?.dateOptions?.showTime ? getField(tabKey, cardKey, fieldKey).dateOptions.showTime : false"
+                                          [timeOnly]="getField(tabKey, cardKey, fieldKey)?.dateOptions?.timeOnly ? getField(tabKey, cardKey, fieldKey).dateOptions.timeOnly : false"
+                                          [hourFormat]="getField(tabKey, cardKey, fieldKey)?.dateOptions?.hourFormat ? getField(tabKey, cardKey, fieldKey).dateOptions.hourFormat : '12'"
+                                          [yearNavigator]="true" yearRange="1990:2030" showButtonBar="true"
+                                          [formControlName]="fieldKey"
+                                          [ngClass]="{'is-invalid': (formSubmitted || form.get(tabKey+'.'+cardKey+'.'+fieldKey).touched) && form.get(tabKey+'.'+cardKey+'.'+fieldKey).errors}">
+                                        </p-calendar>
+                                        <div class="invalid-feedback"
+                                          *ngIf="form.get(tabKey+'.'+cardKey+'.'+fieldKey).errors && ( formSubmitted || form.get(tabKey+'.'+cardKey+'.'+fieldKey).touched)">
+                                          <span>
+                                            {{ getValidatorMessage(tabKey, cardKey, fieldKey)| translate}}
+                                          </span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </ng-container>
+
+                                <!-- file -->
+                                <ng-container
+                                  *ngIf="tabs[tabKey].cards[cardKey].fields[fieldKey].hidden !== true && getFieldDataType(tabKey, cardKey, fieldKey) === dataTypes.File">
+                                  <div class="col-lg-{{getFieldColSize(tabKey, cardKey, fieldKey)}} col-12 px-0">
+                                    <div class="row mx-0 mb-2">
+                                      <div class="form-control-label col-12">
+                                        <label for="{{fieldKey}}">
+                                          {{ getFieldTitle(tabKey, cardKey, fieldKey)| translate}}
+                                          <span *ngIf="isRequired(tabKey, cardKey, fieldKey)"
+                                            class="required text-danger font-weight-bold">*</span>
+                                        </label>
+                                      </div>
+                                      <div class="col-12">
+                                        <p-fileUpload class="form-control h-100" [showCancelButton]="false"
+                                          [showUploadButton]="false" [customUpload]="true"
+                                          [maxFileSize]="getField(tabKey, cardKey, fieldKey)?.fileOptions?.maxFileSize ? getField(tabKey, cardKey, fieldKey).fileOptions.maxFileSize : 2000000"
+                                          [disabled]="(getField(tabKey, cardKey, fieldKey).disabled || tab.cards[cardKey].disabled) ? true : false"
+                                          (onSelect)="onSelectFile($event, tabKey, cardKey, fieldKey)"
+                                          (onRemove)="onRemoveFile($event, tabKey, cardKey, fieldKey)" accept="image/*,application/pdf,.csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,
+                      application/vnd.ms-excel,.doc,.docx,.xml,
+                      application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                                          [ngClass]="{'is-invalid': (formSubmitted || form.get(tabKey+'.'+cardKey+'.'+fieldKey).touched) && form.get(tabKey+'.'+cardKey+'.'+fieldKey).errors}">
+                                        </p-fileUpload>
+                                        <div class="invalid-feedback"
+                                          *ngIf="form.get(tabKey+'.'+cardKey+'.'+fieldKey).errors && ( formSubmitted || form.get(tabKey+'.'+cardKey+'.'+fieldKey).touched)">
+                                          <span>
+                                            {{ getValidatorMessage(tabKey, cardKey, fieldKey)| translate}}
+                                          </span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </ng-container>
+
+
+                                <!-- autocomplete -->
+                                <ng-container
+                                  *ngIf="tabs[tabKey].cards[cardKey].fields[fieldKey].hidden !== true && getFieldDataType(tabKey, cardKey, fieldKey) === dataTypes.AutoComplete">
+                                  <div class="col-lg-{{getFieldColSize(tabKey, cardKey, fieldKey)}} col-12 px-0">
+                                    <div class="row mx-0 mb-2">
+                                      <div class="form-control-label col-12">
+                                        <label for="{{fieldKey}}">
+                                          {{ getFieldTitle(tabKey, cardKey, fieldKey)| translate}}
+                                          <span *ngIf="isRequired(tabKey, cardKey, fieldKey)"
+                                            class="required text-danger font-weight-bold">*</span>
+                                        </label>
+                                      </div>
+                                      <div class="col-12" [ngClass]="{
+                                        'multi-controls': !isFieldDisabled(tabKey, cardKey, fieldKey)
+                                          && (tabs[tabKey].cards[cardKey].fields[fieldKey]?.generalSearchPageListTemplate
+                                          || (tabs[tabKey].cards[cardKey].fields[fieldKey]?.generalSearchDataListConfig &&
+                                          tabs[tabKey].cards[cardKey].fields[fieldKey]?.generalSearchColumns))
+                                      }">
+                                        <p-autoComplete class="auto-complete p-0 form-control"
+                                          (onSelect)="onSelectAutoComplete($event, tabKey, cardKey, fieldKey)"
+                                          (onUnselect)="onUnSelectAutoCompleteMulti($event, tabKey, cardKey, fieldKey)"
+                                          (onClear)="onClearAutoComplete($event, tabKey, cardKey, fieldKey)"
+                                          [field]="getSelectFieldsValue(tabKey, cardKey, fieldKey)"
+                                          [formControlName]="fieldKey" id="{{fieldKey}}"
+                                          [suggestions]="getSelectList(tabKey, cardKey, fieldKey)"
+                                          [delay]="autoCompleteDelay"
+                                          [multiple]="isAutoCompleteModeMulti(tabKey, cardKey, fieldKey)"
+                                          (completeMethod)="completeMethod($event, tabKey, cardKey, fieldKey)"
+                                          [forceSelection]="true" [size]="30" [minLength]="1" [dropdown]="true"
+                                          [ngClass]="{'is-invalid': (formSubmitted || form.get(tabKey+'.'+cardKey+'.'+fieldKey).touched) && form.get(tabKey+'.'+cardKey+'.'+fieldKey).errors}">
+                                          <ng-template let-selectedField pTemplate="item">
+                                            <div class="ui-helper-clearfix">
+                                              <div>
+                                                {{ selectedField[getSelectFieldsValue(tabKey, cardKey, fieldKey)]|
+                                                translate }}
+                                              </div>
+                                            </div>
+                                          </ng-template>
+                                        </p-autoComplete>
+
+                                        <!-- general search -->
+                                        <actions [actions]="generalSearchAction" [params]="{
+                                            field: tabs[tabKey].cards[cardKey].fields[fieldKey],
+                                            tabKey: tabKey,
+                                            cardKey: cardKey,
+                                            fieldKey: fieldKey
+                                          }">
+                                        </actions>
+
+                                        <app-general-search
+                                          *ngIf="(generalSearchSelectedTabKey && generalSearchSelectedTabKey === tabKey) &&
+                                          (generalSearchSelectedCardKey && generalSearchSelectedCardKey === cardKey) &&
+                                          (generalSearchSelectedFieldKey && generalSearchSelectedFieldKey === fieldKey)"
+                                          [showModal]="(generalSearchSelectedTabKey && generalSearchSelectedTabKey === tabKey) &&
+                                          (generalSearchSelectedCardKey && generalSearchSelectedCardKey === cardKey) &&
+                                          (generalSearchSelectedFieldKey && generalSearchSelectedFieldKey === fieldKey)"
+                                          [pageListTemplate]="tabs[tabKey].cards[cardKey].fields[fieldKey]?.generalSearchPageListTemplate"
+                                          [dataListConfig]="tabs[tabKey].cards[cardKey].fields[fieldKey]?.generalSearchDataListConfig"
+                                          [columns]="tabs[tabKey].cards[cardKey].fields[fieldKey]?.generalSearchColumns"
+                                          [autoCompleteMode]="tabs[tabKey].cards[cardKey].fields[fieldKey]?.autoCompleteMode"
+                                          [getSelectedItems]="tabs[tabKey].cards[cardKey].fields[fieldKey]?.generalSearchGetSelectedItems"
+                                          (onSave)="onSaveGeneralSearch($event)" (onCancel)="onCancelGeneralSearch()">
+                                        </app-general-search>
+
+                                        <div class="invalid-feedback"
+                                          *ngIf="form.get(tabKey+'.'+cardKey+'.'+fieldKey).errors?.required && (formSubmitted || form.get(tabKey+'.'+cardKey+'.'+fieldKey).touched)">
+                                          {{'helpers.validation.required'| translate}}
+                                        </div>
+
+
+                                      </div>
+                                    </div>
+                                  </div>
+                                </ng-container>
+
+                                <!-- select -->
+                                <ng-container
+                                  *ngIf="tabs[tabKey].cards[cardKey].fields[fieldKey].hidden !== true && getFieldDataType(tabKey, cardKey, fieldKey) === dataTypes.DropDown">
+                                  <div class="col-lg-{{getFieldColSize(tabKey, cardKey, fieldKey)}} col-12 px-0">
+                                    <div class="row mx-0 mb-2">
+                                      <div class="form-control-label col-12">
+                                        <label for="{{fieldKey}}">
+                                          {{ getFieldTitle(tabKey, cardKey, fieldKey)| translate}}
+                                          <span *ngIf="isRequired(tabKey, cardKey, fieldKey)"
+                                            class="required text-danger font-weight-bold">*</span>
+                                        </label>
+                                      </div>
+                                      <div class="col-12">
+                                        <select class="form-control" [formControlName]="fieldKey" id="{{fieldKey}}"
+                                          [ngClass]="{'is-invalid': (formSubmitted || form.get(tabKey+'.'+cardKey+'.'+fieldKey).touched) && form.get(tabKey+'.'+cardKey+'.'+fieldKey).errors}">
+                                          <option [ngValue]="null"
+                                            selected="[form.get(tabKey+'.'+cardKey+'.'+fieldKey).value === null">
+                                            {{'helpers.labels.select'|translate}}
+                                          </option>
+                                          <option *ngFor="let option of getSelectList(tabKey, cardKey, fieldKey)"
+                                            [ngValue]="option">
+                                            {{ option[getSelectFieldsValue(tabKey, cardKey, fieldKey)]| translate}}
+                                          </option>
+                                        </select>
+                                        <div class="invalid-feedback"
+                                          *ngIf="form.get(tabKey+'.'+cardKey+'.'+fieldKey).errors?.required && (formSubmitted || form.get(tabKey+'.'+cardKey+'.'+fieldKey).touched)">
+                                          {{'helpers.validation.required'| translate}}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </ng-container>
+
+
+                                <!-- checkbox -->
+                                <div class="col-lg-{{getFieldColSize(tabKey, cardKey, fieldKey)}} col-md-6 col-12 mb-1"
+                                  *ngIf="tabs[tabKey].cards[cardKey].fields[fieldKey].hidden !== true && getFieldDataType(tabKey, cardKey, fieldKey) === dataTypes.CheckBox">
+                                  <div class="row mx-0 mb-2 check-without-label">
+                                    <div
+                                      *ngIf="tabs[tabKey].cards[cardKey]?.fields[fieldKey]?.selectOptions?.binary !== true"
+                                      class="form-control-label col-12">
+                                      <label for="{{fieldKey}}">
+                                        {{ getFieldTitle(tabKey, cardKey, fieldKey)| translate }}
+                                        <span *ngIf="isRequired(tabKey, cardKey, fieldKey)"
+                                          class="required text-danger font-weight-bold">*</span>
+                                      </label>
+
+                                    </div>
+                                    <div class="col-12">
+                                      <p-checkbox
+                                        *ngIf="tabs[tabKey].cards[cardKey]?.fields[fieldKey]?.selectOptions?.binary === true"
+                                        [formControlName]="fieldKey" binary="true"
+                                        label="{{ getFieldTitle(tabKey, cardKey, fieldKey)| translate}}">
+                                      </p-checkbox>
+                                      <ng-container
+                                        *ngIf="tabs[tabKey].cards[cardKey]?.fields[fieldKey]?.selectOptions?.binary !== true">
+                                        <div
+                                          *ngFor="let option of tabs[tabKey].cards[cardKey]?.fields[fieldKey]?.selectOptions?.list">
+                                          <p-checkbox [formControlName]="fieldKey" [value]="option?.value"
+                                            label="{{option?.title |translate}}">
+                                          </p-checkbox>
+                                        </div>
+                                      </ng-container>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <!-- Radio Button -->
+                                <div class="col-lg-{{getFieldColSize(tabKey, cardKey, fieldKey)}} col-12 px-0"
+                                  *ngIf="tabs[tabKey].cards[cardKey].fields[fieldKey].hidden !== true && getFieldDataType(tabKey, cardKey, fieldKey) === dataTypes.RadioButton">
+                                  <div class="row mx-0 mb-2">
+                                    <div class="form-control-label col-12">
+                                      <label for="{{fieldKey}}">
+                                        {{ getFieldTitle(tabKey, cardKey, fieldKey)| translate }}
+                                        <span *ngIf="isRequired(tabKey, cardKey, fieldKey)"
+                                          class="required text-danger font-weight-bold">*</span>
+                                      </label>
+                                    </div>
+                                    <div class="col-12">
+                                      <ng-container
+                                        *ngFor="let option of tabs[tabKey].cards[cardKey]?.fields[fieldKey]?.selectOptions?.list">
+
+                                        <p-radioButton class="px-1" name="{{fieldKey}}" [value]="option.value"
+                                          label=" {{option?.title |translate}}" [formControlName]="fieldKey">
+                                        </p-radioButton>
+
+                                      </ng-container>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <!-- static value -->
+                                <ng-container
+                                  *ngIf="tabs[tabKey].cards[cardKey].fields[fieldKey].hidden !== true && getFieldDataType(tabKey, cardKey, fieldKey) === dataTypes.Static">
+                                  <div class="col-lg-{{getFieldColSize(tabKey, cardKey, fieldKey)}} col-12 px-0">
+                                    <div class="row mx-0 mb-2">
+                                      <div class="form-control-label col-12">
+                                        <label for="{{fieldKey}}">
+                                          {{ getFieldTitle(tabKey, cardKey, fieldKey)| translate}}
+                                        </label>
+                                      </div>
+                                      <div class="col-12">
+                                        <ng-container *ngIf="!getField(tabKey, cardKey, fieldKey).pipe">
+                                          <span>{{ form.get(tabKey + '.' + cardKey+'.'+fieldKey).value || '----'
+                                            }}</span>
+                                        </ng-container>
+                                        <ng-container *ngIf="getField(tabKey, cardKey, fieldKey).pipe">
+                                          <span
+                                            *ngIf="!form.get(tabKey + '.' + cardKey + '.' + fieldKey).value">---</span>
+                                          <span *ngIf="form.get(tabKey + '.' + cardKey + '.' + fieldKey).value">
+                                            {{ getField(tabKey, cardKey, fieldKey).pipe === "date" ?
+                                            (form.get(tabKey + '.' + cardKey+'.'+fieldKey).value | date:
+                                            (getField(tabKey, cardKey, fieldKey).format || "dd/MM/yyyy"))
+                                            : (form.get(tabKey + '.' + cardKey+'.'+fieldKey).value || '---') }}
+                                          </span>
+                                        </ng-container>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </ng-container>
+
+                                <!-- Template field -->
+                                <ng-container
+                                  *ngIf="tabs[tabKey]?.cards[cardKey].fields[fieldKey].hidden !== true && getFieldDataType(tabKey, cardKey, fieldKey) === dataTypes.Template">
+                                  <div class="col-lg-{{getFieldColSize(tabKey, cardKey, fieldKey)}} col-12 px-0">
+                                    <ng-template
+                                      [ngTemplateOutlet]="tabs[tabKey]?.cards[cardKey].fields[fieldKey].contentTemplate"
+                                      [ngTemplateOutletContext]="{$implicit: formEvent}"></ng-template>
+                                  </div>
+                                </ng-container>
+
+                              </ng-template>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                    </ng-container>
+
+                    <!-- multi-card -->
+                    <ng-container
+                      *ngIf="tabs[tabKey].cards[cardKey].hidden !== true && tabs[tabKey].cards[cardKey].type === cardTypes.Multi">
+                      <div class="col-{{tabs[tabKey]?.cards[cardKey].cardSize || 6}} px-0">
+                        <div class="col-card">
+                          <div #dataList dataList [config]="tabs[tabKey].cards[cardKey].dataListConfig"
+                            [columns]="tabs[tabKey].cards[cardKey].columns"
+                            [itemsList]="tabs[tabKey].cards[cardKey].itemsList"
+                            [rowActions]="tabs[tabKey].cards[cardKey].rowActions"
+                            [titleActions]="tabs[tabKey].cards[cardKey].titleActions"
+                            [additionalParams]="{tabKey: tabKey, cardKey: cardKey}">
+                          </div>
+
+                          <app-dynamic-form *ngIf="visibleListTabKey === tabKey && visibleListCardKey === cardKey"
+                            [model]="listCardDynamicFormModel" [enableDateTransformFormat]="false"
+                            (onCancel)="onCancelListCardPopUp()" (onSave)="onSaveListCard($event, tabKey, cardKey)">
+                          </app-dynamic-form>
+
+                          <!-- line-dimension-card -->
+                          <ng-container *ngIf="inLineDimensionCardsInfo[tabKey + cardKey] && inLineDimensionCardsInfo[tabKey + cardKey].hasDimensions !== false
+                              && inLineDimensionCardsInfo[tabKey + cardKey].showCard === true">
+                            <app-line-dimension-card [dimensionCardDetails]="inLineDimensionCardsInfo[tabKey + cardKey]"
+                              (onCancelInLineDimensions)="onCancelInLineDimensions($event)"
+                              (onSaveInLineDimensions)="onSaveInLineDimensions($event)" [fieldValues]="tabs[tabKey].cards[cardKey].itemsList &&
+                              inLineDimensionCardsInfo[tabKey + cardKey] &&
+                              tabs[tabKey].cards[cardKey].itemsList[inLineDimensionCardsInfo[tabKey + cardKey].rowIndex] &&
+                              tabs[tabKey].cards[cardKey].itemsList[inLineDimensionCardsInfo[tabKey + cardKey].rowIndex].lineDimensions ?
+                              tabs[tabKey].cards[cardKey].itemsList[inLineDimensionCardsInfo[tabKey + cardKey].rowIndex].lineDimensions :
+                              null">
+                            </app-line-dimension-card>
+                          </ng-container>
+                          <!-- line-dimension-card -->
+
+                        </div>
+
+
+                      </div>
+
+                    </ng-container>
+
+                    <!-- Template Card () -->
+                    <ng-container
+                      *ngIf="tabs[tabKey]?.cards[cardKey].hidden !== true && tabs[tabKey]?.cards[cardKey]?.type === cardTypes.Template">
+                      <div class="col-{{tabs[tabKey]?.cards[cardKey].cardSize || 6}} px-0">
+                        <div class="col-card">
+                          <ng-template [ngTemplateOutlet]="tabs[tabKey]?.cards[cardKey].contentTemplate"
+                            [ngTemplateOutletContext]="{$implicit: formEvent}"></ng-template>
+                        </div>
+
+                      </div>
+
+
+                    </ng-container>
+
+                  </ng-template>
+                </div>
+              </ng-container>
+
+              <!-- Tab-Template -->
+              <ng-container *ngIf="tabs[tabKey].type === tabTypes.Template">
+                <div class="col-card">
+                  <ng-template [ngTemplateOutlet]="tabs[tabKey]?.contentTemplate"
+                    [ngTemplateOutletContext]="{$implicit: formEvent}"></ng-template>
+                </div>
+              </ng-container>
+
+            </div>
+          </ng-container>
+          <!-- end-all-dynamic-tabes -->
+
+          <!-- activities-tab -->
+          <ng-container
+            *ngIf="entityInfo && entityInfo.hasActivities && selectedTabKey === 'activityTab' && mode === singlePageMode.Update">
+            <div class="row floating-row mx-0 tab-pane fade show" id="activityTab" role="tabpanel"
+              aria-labelledby="tab-" [ngClass]="{'active': selectedTabKey === 'activityTab'}">
+              <div class="col-lg-12 px-0">
+                <!-- <div class="col-card"> -->
+
+                <activity-details [entity]="entityInfo" [staticRecordId]="id"
+                  [hasCreateAction]="canEdit && showCreateActivityAction()">
+                </activity-details>
+                <!-- </div> -->
+              </div>
+            </div>
+          </ng-container>
+          <!-- activities-tab -->
+
+          <!-- Attachments-tab -->
+          <ng-container
+            *ngIf="entityInfo && entityInfo.hasAttachments && selectedTabKey === 'attachmentTab' && mode === singlePageMode.Update">
+            <div class="row floating-row mx-0 tab-pane fade show" id="attachmentTab" role="tabpanel"
+              aria-labelledby="tab-" [ngClass]="{'active': selectedTabKey === 'attachmentTab'}">
+              <div class="col-lg-12 px-0">
+                <!-- <div class="col-card"> -->
+                <app-entity-attachments [filterAttachment]="filterAttachment" [hasAdvancedSearch]="false">
+                </app-entity-attachments>
+                <!-- </div> -->
+              </div>
+            </div>
+          </ng-container>
+          <!-- Attachments-tab -->
+
+          <!-- Dimensions Tab -->
+          <ng-container *ngIf="tabs && tabs.dimensionsUniqueTab && this.entityName">
+            <div class="row floating-row mx-0 tab-pane fade show" id="dimensionsTab" role="tabpanel"
+              aria-labelledby="tab-"
+              [ngClass]="{'active': selectedTabKey === 'dimensionsUniqueTab', 'hide-dimension-card': selectedTabKey !== 'dimensionsUniqueTab'}">
+              <div class="col-lg-12 px-0">
+                <app-dimension-card [dimensionCardDetails]="{entityName: entityName, entityId: id}"
+                  (onHasDimensionsHeader)="onHasDimensionsHeader($event)"
+                  (onHasRelatedEntitiesInHeader)="onHasRelatedEntitiesInHeader($event)">
+                </app-dimension-card>
+              </div>
+            </div>
+          </ng-container>
+          <!-- Dimensions Tab-->
+
+          <!-- clear div to solve float problem with sticky header  -->
+          <div style="clear: both;"></div>
+        </div>
+
+
+
+      </div>
+    </div>
+
+    <!-- action-entry -->
+    <div class="modal fade text-left" id="details-action-entry-modal" tabindex="-1" role="dialog"
+      aria-labelledby="myModalLabel1" data-backdrop="static" data-keyboard="false" aria-hidden="true">
+      <div *ngIf="currentActionEntry">
+        <action-entry [title]='currentActionEntry.title' [actionDetails]='currentActionEntry.actionDetails'
+          (onSaved)="onActionEnterySaved()" (onCanceled)="closeActionEntryModal()"
+          [entityEntryIds]='currentActionEntry.entityEntryIds'></action-entry>
+      </div>
+    </div>
+    <!-- action-entry -->
+
+  </ng-template>
+</div>

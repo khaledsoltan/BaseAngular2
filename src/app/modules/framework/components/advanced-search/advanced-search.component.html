@@ -1,0 +1,313 @@
+<p-dialog [(visible)]="show" [style]="{width: '35vw'}" position="right" [modal]="true" [draggable]="false">
+  <ng-template pTemplate="header">
+    {{ config.cardTitle?(config.cardTitle | translate): ('helpers.buttons.searchButton' | translate )}}
+  </ng-template>
+  <form class="form-card px-0" [formGroup]="searchForm" (reset)="onResetSearchForm($event)"
+    (ngSubmit)="OnSubmitSearchForm($event)">
+    <div class="w-100" formArrayName="searchFields">
+      <ng-container>
+        <ng-template ngFor let-field [ngForOf]="searchFields.controls" let-index="index">
+          <ng-container
+            *ngIf="config.searchFields[index] && !config.searchFields[index].hidden && config.searchFields[index].type == searchFieldTypesEnum.Text">
+            <div class="group-control mb-2">
+              <div class="form-label mb-0">
+                <label for="textField##{{index}}">
+                  {{(config.searchFields[index].title)| translate}}
+                </label>
+              </div>
+              <div class="form-input">
+                <div class="d-flex justify-content-between multi-controls gap-1" [formGroupName]="index">
+                  <select formControlName="operator" class="control search-dynamic-select fs-12"
+                    *ngIf="config.showOperators && config.searchFields[index].showOperators">
+                    <option
+                      *ngFor="let item of config.searchFields[index].operators || searchFieldTypes[config.searchFields[index].type].operators"
+                      [value]="item.code">
+                      {{ (item.title | translate)||item.title}}
+                    </option>
+                  </select>
+                  <!-- [ngClass]="{'search-dynamic-input': config.showOperators && config.searchFields[index].showOperators }" -->
+                  <input type="text" class="control"
+                    [ngClass]="(config.showOperators && config.searchFields[index].showOperators)?'search-dynamic-input':'full-widh-input'"
+                    id="textField##{{index}}" formControlName="value" />
+                </div>
+              </div>
+            </div>
+          </ng-container>
+
+          <ng-container
+            *ngIf="config.searchFields[index] && !config.searchFields[index].hidden && config.searchFields[index].type == searchFieldTypesEnum.Number">
+
+            <div class="group-control mb-2">
+              <div class="form-label mb-0">
+                <label for="numberField##{{index}}">
+                  {{(config.searchFields[index].title)| translate}}
+                </label>
+              </div>
+              <div class="form-input">
+                <div class="d-flex justify-content-between multi-controls gap-1" [formGroupName]="index">
+                  <select formControlName="operator" class="control search-dynamic-select fs-12"
+                    *ngIf="config.showOperators && config.searchFields[index].showOperators">
+                    <option
+                      *ngFor="let item of config.searchFields[index].operators || searchFieldTypes[config.searchFields[index].type].operators"
+                      [value]="item.code">
+                      {{ (item.title | translate)||item.title}}
+                    </option>
+                  </select>
+                  <input type="number" class="control"
+                    [ngClass]="(config.showOperators && config.searchFields[index].showOperators)?'search-dynamic-input':'full-widh-input'"
+                    id="numberField##{{index}}" formControlName="value" />
+                </div>
+              </div>
+            </div>
+          </ng-container>
+          <!-- Radio Button -->
+          <ng-container *ngIf="config.searchFields[index] && !config.searchFields[index].hidden &&
+            config.searchFields[index].type == searchFieldTypesEnum.RadioButton">
+            <div class="group-control mb-2 {{config.searchFields[index].width || searchFieldWidthEnum.FullWidth} ">
+              <div class="form-label mb-0">
+                <label for="radioButtonField##{{index}}">
+                  {{(config.searchFields[index].title)| translate}}
+                </label>
+              </div>
+              <div class="form-input">
+                <div class="d-flex justify-content-between multi-controls gap-1" [formGroupName]="index">
+                  <ng-container *ngIf="config.searchFields[index].selectFieldProps">
+
+                    <p-radioButton *ngFor="let option of config.searchFields[index].selectFieldProps.selectList"
+                      class="px-1" name="{{config.searchFields[index].key}}" (onClick)="onSearchFieldChange(index)"
+                      [value]="option[config.searchFields[index].selectFieldProps.key||'id']"
+                      label=" {{option[config.searchFields[index].selectFieldProps.value||'name'] |translate}}"
+                      formControlName="value">
+                    </p-radioButton>
+                  </ng-container>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+
+          <!-- CheckBox -->
+          <ng-container *ngIf="config.searchFields[index] && !config.searchFields[index].hidden &&
+            config.searchFields[index].type == searchFieldTypesEnum.Checkbox">
+            <div class="group-control mb-2  {{config.searchFields[index].width || searchFieldWidthEnum.FullWidth}">
+              <div class="form-label mb-0">
+                <label for="checkBoxField##{{index}}">
+                  {{(config.searchFields[index].title)| translate}}
+                </label>
+              </div>
+              <div class="form-input" [formGroupName]="index">
+
+                <p-checkbox name="{{config.searchFields[index].key}}"
+                  *ngFor="let option of config.searchFields[index]?.selectFieldProps?.selectList" class="px-1 d-block"
+                  (onChange)="onSearchFieldChange(index)"
+                  [value]="option[config.searchFields[index].selectFieldProps.key||'id']"
+                  label=" {{option[config.searchFields[index].selectFieldProps.value||'name'] | translate}}"
+                  formControlName="value">
+                </p-checkbox>
+
+              </div>
+            </div>
+          </ng-container>
+
+          <!-- date  -->
+          <ng-container
+            *ngIf="config.searchFields[index]&& !config.searchFields[index].hidden && config.searchFields[index].type == searchFieldTypesEnum.Date">
+            <div class="group-control mb-2">
+              <div class="form-label mb-0">
+                <label for="dateField##{{index}}">
+                  {{(config.searchFields[index].title)| translate}}
+                </label>
+              </div>
+              <div class="form-input">
+                <div class="d-flex justify-content-between multi-controls gap-1" [formGroupName]="index">
+                  <select formControlName="operator" class="control search-dynamic-select fs-12"
+                    *ngIf="config.showOperators && config.searchFields[index].showOperators">
+                    <option
+                      *ngFor="let item of config.searchFields[index].operators || searchFieldTypes[config.searchFields[index].type].operators"
+                      [value]="item.code">
+                      {{ (item.title | translate)||item.title}}
+                    </option>
+                  </select>
+                  <p-calendar [appendTo]="'body'" class=" control form-date form-date-left p-0"
+                    [ngClass]="(config.showOperators && config.searchFields[index].showOperators)?'search-dynamic-input':'full-widh-input'"
+                    inputId="dateField##{{index}}" [readonlyInput]="true" [monthNavigator]="true" [yearNavigator]="true"
+                    yearRange="1990:2030" [showButtonBar]="true" formControlName="value" dateFormat="dd/mm/yy"
+                    [view]="config.searchFields[index].calendarConfig?.view || CalendarViews.date">
+                  </p-calendar>
+                </div>
+              </div>
+            </div>
+
+
+
+
+          </ng-container>
+
+          <!-- select  -->
+          <ng-container
+            *ngIf="config.searchFields[index] && !config.searchFields[index].hidden && config.searchFields[index].type == searchFieldTypesEnum.DropDown">
+            <div class="group-control mb-2">
+              <div class="form-label mb-0">
+
+                <label for="ddlField##{{index}}">
+                  {{(config.searchFields[index].title)| translate}}
+                </label>
+              </div>
+              <div class="form-input">
+                <div class="d-flex justify-content-between multi-controls gap-1" [formGroupName]="index">
+                  <select formControlName="operator" class="control search-dynamic-select fs-12"
+                    *ngIf="config.showOperators && config.searchFields[index].showOperators">
+                    <option
+                      *ngFor="let item of config.searchFields[index].operators || searchFieldTypes[config.searchFields[index].type].operators"
+                      [value]="item.code">
+                      {{ (item.title | translate)||item.title}}
+                    </option>
+                  </select>
+                  <select id="ddlField##{{index}}" class="control"
+                    [ngClass]="(config.showOperators && config.searchFields[index].showOperators)?'search-dynamic-input':'full-widh-input'"
+                    formControlName="value"
+                    *ngIf="config.searchFields[index].selectFieldProps && config.searchFields[index].selectFieldProps.selectList">
+                    <option selected value="">
+                      {{'helpers.common.all' | translate}}
+                    </option>
+                    <option *ngFor="let item of config.searchFields[index].selectFieldProps.selectList"
+                      [ngValue]="item[config.searchFields[index].selectFieldProps.key]">
+                      {{ config.searchFields[index].selectFieldProps.useTranslatePipe===true?
+                      (item[config.searchFields[index].selectFieldProps.value] |
+                      translate):item[config.searchFields[index].selectFieldProps.value]}}
+                    </option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+
+          <!-- multi select -->
+          <ng-container
+            *ngIf="config.searchFields[index] && !config.searchFields[index].hidden && config.searchFields[index].type == searchFieldTypesEnum.MultiSelect">
+            <div class="group-control mb-2 mb-1" [formGroupName]="index">
+              <label class="mb-1" for="mslField##{{index}}">
+                {{(config.searchFields[index].title)| translate}}
+              </label>
+              <!-- multi-controls -->
+              <div class="d-flex justify-content-between multi-controls gap-1 ">
+                <select formControlName="operator" class="form-control search-dynamic-select fs-12"
+                  *ngIf="config.showOperators && config.searchFields[index].showOperators">
+                  <option
+                    *ngFor="let item of config.searchFields[index].operators || searchFieldTypes[config.searchFields[index].type].operators"
+                    [value]="item.code">
+                    {{ (item.title | translate)||item.title}}
+                  </option>
+                </select>
+                <!-- [ngClass]="{'search-dynamic-input': config.showOperators && config.searchFields[index].showOperators}" -->
+                <p-multiSelect id="mslField##{{index}}"
+                  [ngClass]="(config.showOperators && config.searchFields[index].showOperators)?'search-dynamic-input':'w-100'"
+                  formControlName="value"
+                  *ngIf="config.searchFields[index].selectFieldProps && config.searchFields[index].selectFieldProps.selectList"
+                  [options]="config.searchFields[index].selectFieldProps.selectList"
+                  defaultLabel="{{'helpers.labels.selectMulti' | translate}}" [maxSelectedLabels]="1"
+                  [optionLabel]="config.searchFields[index].selectFieldProps.value || 'name'"
+                  [dataKey]="config.searchFields[index].selectFieldProps.key || 'id'">
+                </p-multiSelect>
+
+                <!-- general search -->
+                <actions [actions]="generalSearchAction" [params]="{
+                  field:  config.searchFields[index],
+                  fieldIndex: index
+                }">
+                </actions>
+
+                <app-general-search
+                  *ngIf="generalSearchSelectedFieldIndex !== null && generalSearchSelectedFieldIndex === index"
+                  [showModal]="generalSearchSelectedFieldIndex !== null && generalSearchSelectedFieldIndex === index"
+                  [fixedHeight]="true" [autoCompleteMode]="autoCompleteMode.Multi"
+                  [pageListTemplate]="config.searchFields[index]?.generalSearchPageListTemplate"
+                  [dataListConfig]="config.searchFields[index]?.generalSearchDataListConfig"
+                  [columns]="config.searchFields[index]?.generalSearchColumns"
+                  [getSelectedItems]="config.searchFields[index]?.generalSearchGetSelectedItems"
+                  (onSave)="onSaveGeneralSearch($event)" (onCancel)="onCancelGeneralSearch()">
+                </app-general-search>
+              </div>
+            </div>
+          </ng-container>
+
+
+
+          <!-- auto complete  -->
+          <ng-container
+            *ngIf="config.searchFields[index] && !config.searchFields[index].hidden && config.searchFields[index].type == searchFieldTypesEnum.AutoComplete">
+            <div
+              class="group-control {{config.searchFields[index].width || (isAutoCompleteModeMulti(index) ? searchFieldWidthEnum.FullWidth : searchFieldWidthEnum.FullWidth)}}">
+              <div class="form-label mb-0">
+                <label for="acField##{{index}}">{{(config.searchFields[index].title)| translate}}</label>
+              </div>
+              <div class="form-input">
+                <!-- incase add general search  -->
+                <!-- [ngClass]="{'multi-controls': expression}" -->
+                <div class="d-flex justify-content-between multi-controls gap-1" [formGroupName]="index">
+
+                  <select formControlName="operator" class="control search-dynamic-select fs-12"
+                    *ngIf="config.showOperators && config.searchFields[index].showOperators">
+                    <option
+                      *ngFor="let item of config.searchFields[index].operators || searchFieldTypes[config.searchFields[index].type].operators"
+                      [value]="item.code">
+                      {{ (item.title | translate)||item.title}}
+                    </option>
+                  </select>
+
+                  <p-autoComplete class="auto-complete"
+                    [ngClass]="(config.showOperators && config.searchFields[index].showOperators)?'search-dynamic-input':'full-widh-input'"
+                    field="{{config.searchFields[index].selectFieldProps.value}}"
+                    [delay]="config.searchFields[index].selectFieldProps.apiSingleCalling===true?0:1500"
+                    [suggestions]="config.searchFields[index].selectFieldProps.selectList" inputId="acField##{{index}}"
+                    formControlName="value" [multiple]="isAutoCompleteModeMulti(index)"
+                    (completeMethod)="completeMethod($event,config.searchFields[index])" [size]="30" [minLength]="1"
+                    [dropdown]="true">
+                    <ng-template let-item pTemplate="item">
+                      <div class="ui-helper-clearfix">
+                        <div>
+                          {{ config.searchFields[index].selectFieldProps.useTranslatePipe===true?
+                          (item[config.searchFields[index].selectFieldProps.value] |
+                          translate):item[config.searchFields[index].selectFieldProps.value]}}
+                        </div>
+                      </div>
+                    </ng-template>
+                  </p-autoComplete>
+
+                  <!-- general search -->
+                  <actions [actions]="generalSearchAction" [params]="{
+                      field:  config.searchFields[index],
+                      fieldIndex: index
+                    }">
+                  </actions>
+
+                  <app-general-search
+                    *ngIf="generalSearchSelectedFieldIndex !== null && generalSearchSelectedFieldIndex === index"
+                    [showModal]="generalSearchSelectedFieldIndex !== null && generalSearchSelectedFieldIndex === index"
+                    [fixedHeight]="true" [autoCompleteMode]="config.searchFields[index]?.autoCompleteMode"
+                    [pageListTemplate]="config.searchFields[index]?.generalSearchPageListTemplate"
+                    [dataListConfig]="config.searchFields[index]?.generalSearchDataListConfig"
+                    [columns]="config.searchFields[index]?.generalSearchColumns"
+                    [getSelectedItems]="config.searchFields[index]?.generalSearchGetSelectedItems"
+                    (onSave)="onSaveGeneralSearch($event)" (onCancel)="onCancelGeneralSearch()">
+                  </app-general-search>
+
+                </div>
+              </div>
+            </div>
+
+
+          </ng-container>
+        </ng-template>
+      </ng-container>
+    </div>
+  </form>
+  <ng-template pTemplate="footer">
+    <button type="button" class="btn btn-solid" (click)="OnSubmitSearchForm($event)">
+      {{ config.searchBtnText? (config.searchBtnText | translate) : ('helpers.buttons.searchButton' | translate)}}
+    </button>
+    <button type="reset" class="btn btn-outline primary-border" (click)=" onResetSearchForm($event)">
+      {{ 'helpers.buttons.resetButton' | translate }}
+    </button>
+
+  </ng-template>
+</p-dialog>

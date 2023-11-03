@@ -1,0 +1,55 @@
+<div class="chat" appSpinner>
+  <div class="messages" *ngIf="messages && messages.length > 0">
+    <div class="d-flex flex-column-reverse justify-content-between messages-content">
+      <!-- senser message 2  -->
+      <div *ngFor="let message of messages" [ngClass]="{'flex-row-reverse': currentUserType===message.userType}"
+        class="d-card hori-card  bg-white border-0">
+        <div routerlinkactive="router-link-active" class="side-icon">
+          <img *ngIf="message.imagePath && currentUserType===message.userType" src="{{getImagePath(message)}}"
+            class="rounded-circle bg-blue-light-2" width="40" alt="">
+          <img
+            *ngIf="(!message.imagePath || currentUserType!==message.userType)&&message.userType===UserTypeEnum.Dentist "
+            src="../../../../../assets/images/imgs/dentist.png" class="rounded-circle bg-blue-light-2" width="40"
+            alt="">
+          <img *ngIf="(!message.imagePath || currentUserType!==message.userType)&&message.userType===UserTypeEnum.Lab"
+            src="../../../../../assets/images/imgs/lab.png" class="rounded-circle bg-blue-light-2" width="40" alt="">
+        </div>
+        <!-- [ngClass]="{'align-items-end': currentUserType === {{message.userType}}}" -->
+        <div [ngClass]="{'align-items-end d-flex flex-column': currentUserType===message.userType}" class="data-side ">
+          <div class="tit">
+            <div>
+              <!-- <span class="fs-18 dark-text">{{currentUserType===message.userType?
+                                ('helpers.common.me'|translate):message.userName}}
+
+                            </span> -->
+              <!-- <span class="fs-18 dark-text" >{{message.userName}}<span class="font-weight-normal dark-text">
+                                    <span *ngIf="message.userType==2"> ({{'dentist.dentist'|translate}})</span>
+                                    <span *ngIf="message.userType==3"> ({{'lab.lab'|translate}})</span>
+                                </span> </span> -->
+            </div>
+          </div>
+          <div [ngClass]="[ currentUserType===message.userType? 'end-top reciever': 'left-top sender']"
+            class="talk-bubble tri-right ">
+            <div class="talktext mb-3 multiline-area">
+              <p>
+                {{message.message}}
+              </p>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="font-weight-normal fs-12 dark-text"> {{message.creationDate |
+                timestamp}}</span>
+
+              <i *ngIf="canDelete === true && currentUserType===message.userType" (click)="delete(message)"
+                class="las la-trash fs-18 text-danger"></i>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <!-- end senser message 2  -->
+    </div>
+  </div>
+</div>
+<div *ngIf="isMessagesNotLoaded" style="text-align: center;">
+  {{'helpers.buttons.noDataAvailable'|translate}}
+</div>

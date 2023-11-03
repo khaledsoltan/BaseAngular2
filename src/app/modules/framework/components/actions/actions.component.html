@@ -1,0 +1,90 @@
+<ul *ngIf="actions && (actions.list?.length > 0 || actions.moreActions?.length > 0 || actions.toggleCols?.length > 0)"
+  class="d-flex {{'list-icons-' + actions?.type}}">
+
+
+  <!-- moreAction -->
+  <ng-container *ngIf="actions.moreActions?.length > 0
+         && actions.moreActions?.length !== hiddenActionsLength(params)
+         && moreActionsMenuItems.length>0" pTooltip="{{'helpers.buttons.showMore' | translate}}" tooltipPosition="top">
+    <p-menu #menu (onShow)=" onClickMoreAction();" [appendTo]="'body'" [showTransitionOptions]="'0ms'"
+      [hideTransitionOptions]="'0ms'" [model]="moreActionsMenuItems" [popup]="true"></p-menu>
+    <!-- <button type="button" pButton icon="pi pi-bars" label="Show" (click)="menu.toggle($event)"></button> -->
+    <li class="d-inline-block action-icon cursor-pointer">
+      <a (click)="menu.toggle($event)" href="javascript:;">
+        <i class="cursor-pointer {{actionTypes[moreActionType||'moreActions'].icon }}">
+        </i>
+      </a>
+    </li>
+    <li *ngIf="actions?.toggleCols?.length > 0" class="d-inline-block action-icon cursor-pointer dropdown">
+      <a href="javascript:;" id="triggerId" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+        (click)="menu.hide()">
+        <i class="cursor-pointer {{ actionTypes['toggleCols'].icon }}"
+          pTooltip="{{'helpers.buttons.toggleColumns' | translate}}" tooltipPosition="left">
+        </i>
+      </a>
+      <div class="dropdown-menu dropdown-menu-right show-hide-cols-dropdown" (click)="preventClose($event)"
+        aria-labelledby="triggerId">
+    <li *ngFor="let col of actions.toggleCols" (click)="toggleCol(col,$event)" class="col-name">
+      <i *ngIf="!col.hidden" class="las la-check pr-1"></i>
+      <i *ngIf="col.hidden" class="las la-times pr-1"></i>
+      {{ col.field === 'actions' ? ('helpers.buttons.actionsHeaderOfDataTable' | translate) : (col.title | translate) }}
+    </li>
+    <p (click)="showAllColumns()" class="">
+      {{ 'helpers.buttons.showAllColumns' | translate}}
+    </p>
+    </div>
+    </li>
+  </ng-container>
+
+  <!-- Toggel  -->
+  <ng-container
+    *ngIf="actions.moreActions?.length === 0 && actions.moreActions?.length === hiddenActionsLength(params) && moreActionsMenuItems.length === 0"
+    pTooltip="{{'helpers.buttons.showMore' | translate}}" tooltipPosition="top">
+    <li *ngIf="actions?.toggleCols?.length > 0" class="d-inline-block action-icon cursor-pointer dropdown">
+      <a href="javascript:;" id="triggerId" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <i class="cursor-pointer {{ actionTypes['toggleCols'].icon }}"
+          pTooltip="{{'helpers.buttons.toggleColumns' | translate}}" tooltipPosition="left">
+        </i>
+      </a>
+      <div class="dropdown-menu dropdown-menu-right show-hide-cols-dropdown" aria-labelledby="triggerId">
+    <li *ngFor="let col of actions.toggleCols" (click)="toggleCol(col,$event)" class="col-name">
+      <i *ngIf="!col.hidden" class="las la-check pr-1"></i>
+      <i *ngIf="col.hidden" class="las la-times pr-1"></i>
+      {{ col.field === 'actions' ? ('helpers.buttons.actionsHeaderOfDataTable' | translate) : (col.title | translate) }}
+    </li>
+    <p (click)="showAllColumns()" class="">
+      {{ 'helpers.buttons.showAllColumns' | translate}}
+    </p>
+    </div>
+
+    </li>
+  </ng-container>
+
+  <!-- ListActions -->
+  <ng-container *ngIf="sortedActionsList && sortedActionsList.length>0">
+    <ng-container *ngFor="let action of sortedActionsList; let i = index;">
+      <li #liAction *ngIf="!isHidden(action)" class="d-inline-block action-icon cursor-pointer"
+        [ngStyle]="{'cursor':checkDisable(action,true)===true ? 'not-allowed' : 'pointer' }"
+        (click)="canClickAction(action) ? action.onClick({event: $event, params: params,actionNativeEl:liAction, additionalParams: additionalParams ,rowIndex:rowIndex }) :''">
+
+        <a href="javascript:;" *ngIf="action.href || action.getHref" class="{{action?.type}}"
+          [href]="action.href || action.getHref(params)">
+          <i *ngIf="action.options ? (action.options === 'icon' || action.options === 'all') : true"
+            pTooltip="{{action?.getTitle? (action?.getTitle(params) | translate): (action?.title | translate)}}"
+            tooltipPosition="left" class="{{getActionIconClass(action)}}"></i>
+          <span *ngIf="action.options ? (action.options === 'text' || action.options === 'all') : false">
+            {{action?.getTitle? (action?.getTitle(params) | translate): (action?.title | translate)}}
+          </span>
+        </a>
+        <a href="javascript:;" *ngIf="!action.href && !action.getHref" class="{{action?.type}}">
+          <i *ngIf="action.options ? (action.options === 'icon' || action.options === 'all') : true"
+            pTooltip="{{action?.getTitle? (action?.getTitle(params) | translate): (action?.title | translate)}}"
+            tooltipPosition="left" class="{{getActionIconClass(action)}}"></i>
+          <span *ngIf="action.options ? (action.options === 'text' || action.options === 'all') : false">
+            {{action?.getTitle? (action?.getTitle(params) | translate): (action?.title | translate)}}
+          </span>
+        </a>
+      </li>
+    </ng-container>
+  </ng-container>
+</ul>

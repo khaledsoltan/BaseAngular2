@@ -1,0 +1,37 @@
+<!-- <section id="basic-modals">
+  <div class="row mx-0 px-0" id="accordion"> -->
+
+<!-- <div class="header-bg"> -->
+<!-- #region General Icons On The Page -->
+<actions [actions]="commonActions" *ngIf="commonActions && config?.hasCommonActions"
+  [hidden]="!config?.showCommonActions" (onToggleCol)="onToggleCol($event)"
+  (onShowAllColumns)="onShowAllColumns($event)" [hideAction]="hideAction">
+</actions>
+<!-- #endregion -->
+<!-- </div> -->
+
+<!-- #region Margin Only -->
+<!-- <div class="mb-3">
+</div> -->
+<!-- #endregion -->
+
+<!-- #region Search Card -->
+<div advancedSearch *ngIf="advancedSearchConfig && config?.hasAdvancedSearch" [hidden]="!config?.showAdvancedSearch"
+    (onReset)="onAdvancedResetSearch()"></div>
+<!-- #endregion -->
+
+<!-- #region Grid List -->
+<div dataList 
+  (onStageChanged)="handleStageChanged($event)" (onSearch)="onDataListSearch()"
+  (onUpdateClick)="handleUpdateClick($event)" (onCreateClick)="handleCreateClick($event)"
+  (onDetailsClick)="handleDetailsClick($event)" (onUploadClick)="handleonUploadClick()"
+  class="page-list">
+
+  <ng-content select="*"></ng-content>
+
+</div>
+<!-- #endregion -->
+
+<!--
+  </div>
+</section> -->

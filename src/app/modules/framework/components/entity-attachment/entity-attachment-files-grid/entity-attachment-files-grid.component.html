@@ -1,0 +1,53 @@
+<!-- Manpower Lines Details-->
+<div class="create-card border-r-0  w-100 border-0 mb-3" *ngIf="linesData">
+
+  <div
+    class="secondary-bg  py-2 px-2 d-flex position-relative justify-content-between align-items-center position-relative">
+    <div class="d-flex align-items-center">
+      <!-- <img src="assets/images/Indicator.png" alt="" width="16" height="24" class="mb-2"> -->
+      <i *ngIf="hasExpand === true" class="las la-level-up-alt primary-text fs-20 font-weight-bold primary-text"
+        style="transform: rotate(90deg);"></i>
+      <span class="icon-contract-line primary-text fs-20 px-2"></span>
+      <h4 class="card-title m-0 font-weight-normal fs-13 primary-text">
+        {{'attachment.attachmentFiles' | translate}}
+      </h4>
+    </div>
+  </div>
+
+  <div class="card-body p-0 pb-0">
+    <p-table [value]="linesData" [autoLayout]="true" [responsive]="true" [columns]="tableCols"
+      [style]="{width: '70vw'}">
+      <ng-template pTemplate="header" let-colNames>
+        <tr>
+          <th *ngFor="let colName of colNames" [hidden]="colName.hidden"
+            class="border-0 black-alt-text fs-14 no-outline text-nowrap"
+            [ngClass]="{'action-td-on-grid': colName.field==='actions'}">
+            {{colName.title | translate}}
+          </th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-dataItems let-columns="columns" let-rowIndex="rowIndex">
+        <tr>
+          <td *ngFor="let col of columns" [hidden]="col.hidden" [ngClass]="{'action-td-on-grid': col.field==='actions'}"
+            class="border-0 black-alt-text fs-12 no-outline text-nowrap py-0 px-1">
+            <ng-container *ngIf="col.field === 'actions'; then render_actions; else render_data_field">
+            </ng-container>
+            <ng-template #render_actions>
+              <actions [actions]="rowActions" [params]="dataItems"></actions>
+            </ng-template>
+            <ng-template #render_data_field>
+              {{ dataItems[col.field] }}
+            </ng-template>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage" let-columns>
+        <tr>
+          <td [attr.colspan]="tableCols?.length" class="empty-grid-table text-center">
+            {{'helpers.buttons.noDataAvailable' | translate}}
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>

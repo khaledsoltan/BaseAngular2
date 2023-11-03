@@ -1,0 +1,33 @@
+<div appSpinner>
+    <form class="form-card page-form p-0" [formGroup]="formSendMessage">
+        <div class="d-card ">
+            <div class="row mx-0">
+                <div class="col-md-12">
+                    <div class="group-control">
+                        <div class="form-label">
+                            <label for=""> {{'helpers.common.messageText' | translate}}</label>
+                        </div>
+
+                        <div class="form-input">
+                            <textarea class="control" aria-multiline="true" type="text" formControlName="message"
+                                [ngClass]="{'is-invalid': formSubmitted && formSendMessage.controls['message']!.errors}"></textarea>
+                            <div class="invalid-feedback"
+                                *ngIf="(formSubmitted || formSendMessage.get('message')!.touched) && formSendMessage.get('message')!.errors && formSendMessage.get('message')!.errors!['required'] ">
+                                {{'helpers.validation.required' | translate}}
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="text-end">
+            <button type="button" (click)="sendMessage()" class="btn btn-solid">{{'helpers.common.send' |
+                translate}}</button>
+            <button type="button" (click)="cancel()" class="btn btn-outline">{{'helpers.common.cancel' |
+                translate}}</button>
+
+        </div>
+    </form>
+</div>
